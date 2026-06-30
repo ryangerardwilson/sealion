@@ -11,6 +11,10 @@ generated apps, infrastructure, tests, and documentation have clear ownership.
 |       `-- pages.yml
 |-- bin/
 |   `-- sealion
+|-- cmd/
+|   `-- sealion/
+|       |-- main.go
+|       `-- main_test.go
 |-- docs/
 |   |-- engineering/
 |   |   |-- COMPONENT_STYLE_SYSTEM.md
@@ -70,6 +74,7 @@ generated apps, infrastructure, tests, and documentation have clear ownership.
 |   |-- integration/
 |   |-- regression/
 |   `-- unit/
+|-- go.mod
 |-- install.sh
 `-- README.md
 ```
@@ -77,7 +82,8 @@ generated apps, infrastructure, tests, and documentation have clear ownership.
 ## Ownership
 
 - `.github/workflows/`: CI and documentation deployment.
-- `bin/sealion`: installable CLI entry point.
+- `bin/sealion`: source checkout launcher for the Go CLI.
+- `cmd/sealion/`: Go implementation of the installable CLI.
 - `docs/engineering/`: source-of-truth engineering plans.
 - `docs/site/`: static GitHub Pages artifact.
 - `examples/`: generated or hand-written sample apps.
@@ -100,7 +106,9 @@ generated apps, infrastructure, tests, and documentation have clear ownership.
 - `tests/integration/`: tests that use Postgres or containers.
 - `tests/regression/`: tests created after a bug or broken contract.
 - `tests/unit/`: small deterministic C tests.
-- `install.sh`: GitHub URL installer that places `sealion` on the user's PATH.
+- `go.mod`: Go module definition for the CLI.
+- `install.sh`: GitHub URL installer that builds the Go CLI and places
+  `sealion` on the user's PATH.
 
 ## First Implementation Rule
 

@@ -14,6 +14,9 @@ cd demo
 sealion run dev
 ```
 
+The installer builds the CLI with Go. The generated app does not require host
+Bun, Node, C compiler setup, or Postgres because those run inside containers.
+
 Then open:
 
 ```text
@@ -31,9 +34,10 @@ The frontend listens on port 8080 inside its container. The browser URL is the
 host URL printed by the CLI. API calls use the same origin under `/api`.
 
 When Docker Compose supports file watch, `sealion run dev` starts the stack with
-Compose watch enabled. Edits under `view/web/src/`, `src/`, `model/`,
-`controller/`, view web package/config files, or to `Dockerfile` rebuild and
-replace the relevant container.
+quiet Compose output and watch enabled. Edits under `view/web/src/`, `src/`,
+`model/`, `controller/`, view web package/config files, or to `Dockerfile`
+rebuild and replace the relevant container. Use `docker compose logs -f` for raw
+container logs.
 
 Generated apps keep browser UI in `view/web/src/`. Bun owns the frontend
 server and API proxy, Tailwind owns styling, and React owns page flow, forms,
@@ -75,7 +79,8 @@ unless the current directory is empty.
 ### `sealion run dev`
 
 Runs the generated app through Docker Compose. The frontend, backend, and
-database are separate services, matching the runtime topology contract.
+database are separate services, matching the runtime topology contract. The CLI
+prints the app URL, API URL, demo login, watch status, and the log command.
 
 ## Product Principle
 

@@ -10,6 +10,7 @@ C runtime, Postgres, container, and infrastructure regression coverage.
 Runs on every pull request:
 
 - repository contract checks;
+- Go CLI unit tests;
 - shell syntax checks for repo-owned scripts;
 - documentation site contract checks;
 - generated Docker stack smoke test with Postgres-backed JSON login;
@@ -48,6 +49,7 @@ Initial checks:
   container, C backend container, Postgres-only database, infrastructure as
   code, local Compose first, and Postgres-backed queues;
 - install script, CLI, and default template files exist;
+- the Go CLI builds and its deterministic helpers pass unit tests;
 - documentation site files exist;
 - custom Pages domain is present in `docs/site/CNAME`;
 - workflow files exist.
@@ -134,6 +136,8 @@ Future checks:
 
 - `sealion new` creates the canonical directory structure;
 - `sealion init` succeeds only in an empty directory;
+- `sealion run dev` prints a compact startup summary and suppresses noisy
+  Compose build output by default;
 - generated files are deterministic;
 - invalid commands print actionable errors;
 - scaffolded apps pass the same CI checks as framework examples.
@@ -174,6 +178,7 @@ The first implemented CI job is intentionally small:
 
 ```sh
 bash -n scripts/*.sh bin/sealion install.sh
+go test ./...
 bash scripts/check_repo_contract.sh
 bash scripts/test_cli_scaffold.sh
 bash scripts/test_starter_docker_flow.sh

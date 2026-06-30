@@ -4,9 +4,13 @@ set -euo pipefail
 domain="sealion.ryangerardwilson.com"
 
 required_files=(
+  ".gitignore"
   "README.md"
   "install.sh"
+  "go.mod"
   "bin/sealion"
+  "cmd/sealion/main.go"
+  "cmd/sealion/main_test.go"
   ".github/workflows/ci.yml"
   ".github/workflows/pages.yml"
   "docs/engineering/CI_CD_REGRESSION_TESTS.md"
@@ -42,6 +46,8 @@ required_files=(
 )
 
 required_dirs=(
+  "cmd"
+  "cmd/sealion"
   "src"
   "src/ui"
   "include/sealion"
@@ -92,6 +98,14 @@ grep -q "sealion new" README.md
 grep -q "sealion run dev" README.md
 ! grep -q "command_format" bin/sealion
 ! grep -q "sealion format" bin/sealion
+grep -q "module github.com/ryangerardwilson/sealion" go.mod
+grep -q "package main" cmd/sealion/main.go
+grep -q "composeUpDetached" cmd/sealion/main.go
+grep -q "runComposeWatch" cmd/sealion/main.go
+grep -q -- "--quiet-build" cmd/sealion/main.go
+grep -q "Sealion dev" cmd/sealion/main.go
+grep -q "Go is required to build the Sealion CLI" install.sh
+grep -q ".bin/sealion" install.sh
 grep -q "default_port = 8080" templates/default/sealion.toml
 ! grep -q 'url = "http://localhost:8080"' templates/default/sealion.toml
 grep -q "frontend:" templates/default/docker-compose.yml
@@ -138,8 +152,8 @@ grep -q "handle_api_dashboard" templates/default/src/main.c
 ! grep -R "views/" templates/default README.md docs >/dev/null
 grep -q "API listening inside backend container" templates/default/src/main.c
 grep -q "frontend proxies API calls" templates/default/src/main.c
-grep -q "compose_supports_watch" bin/sealion
-grep -q -- "--watch" bin/sealion
+grep -q "compose.supports(\"--watch\")" cmd/sealion/main.go
+grep -q "watch   enabled" cmd/sealion/main.go
 
 grep -q "$domain" docs/site/index.html
 grep -q "Bun frontend" docs/site/index.html

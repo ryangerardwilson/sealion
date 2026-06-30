@@ -118,6 +118,10 @@ fi
 
 if [ "${1:-}" = "compose" ] && [ "${2:-}" = "up" ] && [ "${3:-}" = "--help" ]; then
   printf 'Usage: docker compose up [OPTIONS]\n'
+  printf '      --quiet-build    Suppress the build output\n'
+  printf '      --quiet-pull     Pull without printing progress information\n'
+  printf '      --wait           Wait for services to be running|healthy\n'
+  printf '      --wait-timeout int\n'
   printf '      --watch    Watch source code and rebuild/refresh containers when files are updated.\n'
   exit 0
 fi
@@ -125,6 +129,16 @@ fi
 if [ "${1:-}" = "compose" ] && [ "${2:-}" = "up" ]; then
   printf '%s\n' "${SEALION_HTTP_PORT:-}" > "$FAKE_DOCKER_PORT_FILE"
   printf '%s\n' "$*" > "$FAKE_DOCKER_ARGS_FILE"
+  exit 0
+fi
+
+if [ "${1:-}" = "compose" ] && [ "${2:-}" = "watch" ]; then
+  printf '%s\n' "$*" >> "$FAKE_DOCKER_ARGS_FILE"
+  exit 0
+fi
+
+if [ "${1:-}" = "compose" ] && [ "${2:-}" = "down" ]; then
+  printf '%s\n' "$*" >> "$FAKE_DOCKER_ARGS_FILE"
   exit 0
 fi
 
@@ -152,10 +166,13 @@ PY
 
   cd "$tmp_dir/demo"
   PATH="$fake_bin:$PATH" FAKE_DOCKER_PORT_FILE="$port_file" FAKE_DOCKER_ARGS_FILE="$args_file" "$repo_root/bin/sealion" run dev > "$tmp_dir/run-dev.out"
-  grep -q "frontend: http://localhost:" "$tmp_dir/run-dev.out"
-  grep -q "backend API: http://localhost:" "$tmp_dir/run-dev.out"
-  grep -q "watch: enabled" "$tmp_dir/run-dev.out"
-  grep -q -- "--watch" "$args_file"
+  grep -q "Sealion dev" "$tmp_dir/run-dev.out"
+  grep -q "app     http://localhost:" "$tmp_dir/run-dev.out"
+  grep -q "api     http://localhost:" "$tmp_dir/run-dev.out"
+  grep -q "watch   enabled" "$tmp_dir/run-dev.out"
+  grep -q -- "--quiet-build" "$args_file"
+  grep -q -- "--quiet-pull" "$args_file"
+  grep -q "compose watch --no-up --quiet" "$args_file"
   selected_port="$(cat "$port_file")"
   if [ "$selected_port" = "8080" ]; then
     printf 'sealion run dev should not select occupied port 8080\n' >&2
@@ -179,7 +196,11 @@ git init --bare "$remote_repo" >/dev/null
 git init "$installed_repo" >/dev/null
 mkdir -p "$installed_repo/bin"
 cp "$repo_root/bin/sealion" "$installed_repo/bin/sealion"
-git -C "$installed_repo" add bin/sealion
+cp "$repo_root/.gitignore" "$installed_repo/.gitignore"
+cp "$repo_root/go.mod" "$installed_repo/go.mod"
+cp -R "$repo_root/cmd" "$installed_repo/cmd"
+git -C "$installed_repo" add .gitignore bin/sealion
+git -C "$installed_repo" add go.mod cmd
 git -C "$installed_repo" -c user.name="Sealion Test" -c user.email="test@sealion.local" commit -m "Initial install" >/dev/null
 git -C "$installed_repo" branch -M main
 git -C "$installed_repo" remote add origin "$remote_repo"
@@ -197,5 +218,6 @@ git -C "$upgrade_work" push >/dev/null
 
 SEALION_HOME="$installed_repo" "$repo_root/bin/sealion" upgrade > "$tmp_dir/upgrade-new.out"
 grep -q "upgraded sealion" "$tmp_dir/upgrade-new.out"
+test -x "$installed_repo/.bin/sealion"
 
 printf 'cli scaffold ok\n'

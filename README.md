@@ -21,7 +21,7 @@ frontend:
 - one API request lifecycle
 - one database migration path
 - one checked-in infrastructure contract
-- one CLI entry point
+- one Go CLI entry point
 - one opinionated set of security defaults
 
 Sealion should make the hard parts visible instead of hiding them behind magic.
@@ -30,6 +30,8 @@ Sealion should make the hard parts visible instead of hiding them behind magic.
 
 - **Container-first:** every app runs through generated containers, not host
   Bun, host compiler setup, or hidden local services.
+- **Go CLI:** `sealion` is a compiled Go CLI. It owns scaffolding, upgrades,
+  local port selection, and the Docker Compose development lifecycle.
 - **React default frontend:** the browser UI lives in the frontend container.
   Bun, React, and Tailwind are required inside that container, not on the
   developer's host machine.
@@ -130,6 +132,10 @@ cd demo
 sealion run dev
 ```
 
+The installer currently builds the `sealion` CLI with Go, so Go must be
+available on the host machine. Generated apps still run Bun, C compilation, and
+Postgres inside containers.
+
 `sealion new <project-name>` creates a new project directory. `sealion init`
 initializes the current directory only when it is empty. `sealion run dev`
 starts the generated frontend, backend, and Postgres containers with register,
@@ -142,9 +148,10 @@ explicitly.
 installed CLI when a newer GitHub commit is available.
 
 When Docker Compose supports file watch, `sealion run dev` starts the stack with
-Compose watch enabled. Edits under `view/web/src/`, `src/`, `model/`,
-`controller/`, view package/config files, or `Dockerfile` rebuild and
-replace the relevant container.
+quiet Compose output and watch enabled. Edits under `view/web/src/`, `src/`,
+`model/`, `controller/`, view package/config files, or `Dockerfile` rebuild and
+replace the relevant container. Use `docker compose logs -f` when you want raw
+container logs.
 
 Generated apps use an MVC shape. `view/web/` owns the Bun server, Tailwind
 build, browser UI, and same-origin `/api` calls. `model/` owns
@@ -167,6 +174,7 @@ owns the C HTTP/API server.
   command contracts.
 - Publish a Bun-served React login/dashboard starter backed by Tailwind, a C
   API, and Postgres.
+- Replace the prototype shell CLI with a compiled Go CLI.
 
 ### Phase 1: HTTP Core
 
@@ -224,7 +232,7 @@ owns the C HTTP/API server.
 
 ### Phase 7: Developer Experience
 
-- Build the `sealion` CLI.
+- Harden the `sealion` Go CLI.
 - Add project scaffolding.
 - Add migration generation.
 - Add infrastructure generation, validation, and diff commands.

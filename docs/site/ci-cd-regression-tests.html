@@ -22,6 +22,7 @@
         <h3>Pull Request Gate</h3>
         <ul>
           <li>Repository contract checks.</li>
+          <li>Go CLI unit tests.</li>
           <li>Shell syntax checks for repo-owned scripts.</li>
           <li>Documentation site contract checks.</li>
           <li>Generated Docker stack smoke test with Postgres-backed login redirect.</li>
@@ -39,7 +40,7 @@
         <h2>Regression Suites</h2>
         <ul>
           <li><strong>Repository contract:</strong> protects required files, docs, workflows, and product constraints.</li>
-          <li><strong>CLI scaffold:</strong> tests <code>sealion new</code>, <code>sealion init</code>, placeholder replacement, and empty-directory enforcement.</li>
+          <li><strong>CLI scaffold:</strong> tests the Go CLI, <code>sealion new</code>, <code>sealion init</code>, compact <code>run dev</code> output, placeholder replacement, and empty-directory enforcement.</li>
           <li><strong>C compile and ABI:</strong> protects public headers, examples, symbols, and release compatibility.</li>
           <li><strong>Unit tests:</strong> protects router, request, response, middleware, config, and logging behavior.</li>
           <li><strong>Sanitizers:</strong> exposes memory ownership, undefined behavior, and leaks.</li>
@@ -56,6 +57,7 @@
       <section>
         <h2>Implemented Now</h2>
         <pre><code>bash -n scripts/*.sh bin/sealion install.sh
+go test ./...
 bash scripts/check_repo_contract.sh
 bash scripts/test_cli_scaffold.sh
 bash scripts/test_starter_docker_flow.sh</code></pre>

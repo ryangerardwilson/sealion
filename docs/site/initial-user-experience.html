@@ -23,10 +23,11 @@
 sealion new demo
 cd demo
 sealion run dev</code></pre>
+        <p>The installer builds the CLI with Go. The generated app does not require host Bun, Node, C compiler setup, or Postgres because those run inside containers.</p>
         <p>Open the app URL printed by <code>sealion run dev</code>.</p>
         <p>If port 8080 is already in use, <code>sealion run dev</code> selects another local port. To choose one explicitly, run <code>SEALION_HTTP_PORT=18080 sealion run dev</code>.</p>
         <p>The frontend listens on port 8080 inside its container. Your browser should use the host URL printed by the CLI.</p>
-        <p>When Docker Compose supports file watch, <code>sealion run dev</code> starts the stack with Compose watch enabled. Edits under <code>view/web/src/</code>, <code>src/</code>, <code>model/</code>, <code>controller/</code>, view web package/config files, or to <code>Dockerfile</code> rebuild and replace the relevant container.</p>
+        <p>When Docker Compose supports file watch, <code>sealion run dev</code> starts the stack with quiet Compose output and watch enabled. Edits under <code>view/web/src/</code>, <code>src/</code>, <code>model/</code>, <code>controller/</code>, view web package/config files, or to <code>Dockerfile</code> rebuild and replace the relevant container. Use <code>docker compose logs -f</code> for raw container logs.</p>
         <p>Generated apps keep browser UI in <code>view/web/src/</code>. Bun owns the frontend server and API proxy, Tailwind owns styling, React owns page flow, forms, and dashboard rendering. The C backend owns <code>/api</code> routes, auth, sessions, validation, and Postgres access.</p>
       </section>
 
@@ -51,7 +52,7 @@ sealion run dev</code></pre>
           <li><code>sealion upgrade</code> upgrades the installed CLI when a newer GitHub commit is available.</li>
           <li><code>sealion new &lt;project-name&gt;</code> creates a new project directory.</li>
           <li><code>sealion init</code> initializes the current empty directory.</li>
-          <li><code>sealion run dev</code> starts the Docker Compose dev stack.</li>
+          <li><code>sealion run dev</code> starts the Docker Compose dev stack and prints the app URL, API URL, demo login, watch status, and log command.</li>
         </ul>
       </section>
     </main>

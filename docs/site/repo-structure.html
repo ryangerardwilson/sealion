@@ -22,6 +22,7 @@
         <pre><code>.
 |-- .github/workflows/
 |-- bin/sealion
+|-- cmd/sealion/
 |-- docs/engineering/
 |-- docs/site/
 |-- examples/hello/
@@ -41,6 +42,7 @@
 |-- tests/integration/
 |-- tests/regression/
 |-- tests/unit/
+|-- go.mod
 `-- install.sh</code></pre>
       </section>
 
@@ -48,7 +50,8 @@
         <h2>Ownership</h2>
         <ul>
           <li><strong>.github/workflows:</strong> CI and documentation deployment.</li>
-          <li><strong>bin/sealion:</strong> installable CLI entry point.</li>
+          <li><strong>bin/sealion:</strong> source checkout launcher for the Go CLI.</li>
+          <li><strong>cmd/sealion:</strong> Go implementation of the installable CLI.</li>
           <li><strong>docs/engineering:</strong> source-of-truth engineering plans.</li>
           <li><strong>docs/site:</strong> static GitHub Pages artifact.</li>
           <li><strong>examples:</strong> generated or hand-written sample apps.</li>
@@ -64,7 +67,8 @@
           <li><strong>templates/default/src:</strong> generated C HTTP/API server.</li>
           <li><strong>templates/default/view/web:</strong> generated Bun/React/Tailwind web app, browser UI, frontend container source, and API proxy.</li>
           <li><strong>tests:</strong> fixtures, unit, integration, and regression coverage.</li>
-          <li><strong>install.sh:</strong> GitHub URL installer.</li>
+          <li><strong>go.mod:</strong> Go module definition for the CLI.</li>
+          <li><strong>install.sh:</strong> GitHub URL installer that builds the Go CLI.</li>
         </ul>
       </section>
 
