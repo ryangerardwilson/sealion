@@ -24,12 +24,12 @@
 
       <section>
         <h2>Authoring Model</h2>
-        <pre><code>view/dashboard.html
+        <pre><code>view/dashboard.skin
 &lt;s-l3.dashboard-page :user-email="user_email" /&gt;
 
 ui_components/l3/dashboard_page.scales
 &lt;h1&gt;Dashboard&lt;/h1&gt;</code></pre>
-        <p>Components receive only props passed by their caller. If an L3 component uses an L2 component, it forwards the required props explicitly. Dotted component names map to <code>.scales</code> paths.</p>
+        <p><code>.skin</code> views import <code>.scales</code> components and pass only explicit props. If an L3 component uses an L2 component, it forwards the required props explicitly. Dotted component names map to <code>.scales</code> paths.</p>
       </section>
 
       <section>

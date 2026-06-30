@@ -179,8 +179,9 @@ variables with `{{ name }}` and trusted raw slots with `{!! content !!}`.
 
 ### Phase 3: Views And Assets
 
-- Keep interpreted `view/*.html` templates as import-only flow files.
-- Keep component implementation in `ui_components/**/*.scales`.
+- Keep interpreted `view/*.skin` templates as import-only flow files.
+- Keep component implementation in `ui_components/**/*.scales`, attached from
+  `.skin` files through Scale component tags.
 - Maintain L1/L2/L3 component boundaries for primitives, patterns, and
   product/domain components.
 - Support escaped variables with `{{ name }}` and trusted raw slots with

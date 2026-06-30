@@ -428,7 +428,7 @@ static bool render_page(
 ) {
   char view_path[256];
   char content[MAX_VIEW];
-  snprintf(view_path, sizeof(view_path), "view/%s.html", view_name);
+  snprintf(view_path, sizeof(view_path), "view/%s.skin", view_name);
   if (!render_template_file(view_path, vars, var_count, content, sizeof(content), 0)) {
     return false;
   }
@@ -440,7 +440,7 @@ static bool render_page(
   for (size_t i = 0; i < var_count; i++) {
     layout_vars[i + 3] = vars[i];
   }
-  return render_template_file("view/layout.html", layout_vars, var_count + 3, out, out_len, 0);
+  return render_template_file("view/layout.skin", layout_vars, var_count + 3, out, out_len, 0);
 }
 
 void respond_view(

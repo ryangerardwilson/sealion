@@ -114,7 +114,7 @@ Future checks:
 - demo login redirects to the protected dashboard with a persisted session;
 - generated Compose config declares file-watch rebuilds for source, model,
   controller, view, component, and Dockerfile changes;
-- generated apps include MVC directories and import-only `view/*.html`
+- generated apps include MVC directories and import-only `view/*.skin`
   templates instead of embedding page markup in C string literals;
 - generated apps include `.scales` components under `ui_components/l1`,
   `ui_components/l2`, and `ui_components/l3`;

@@ -31,12 +31,12 @@ required_files=(
   "templates/default/model/session.c"
   "templates/default/controller/auth_controller.c"
   "templates/default/controller/page_controller.c"
-  "templates/default/view/layout.html"
-  "templates/default/view/home.html"
-  "templates/default/view/register.html"
-  "templates/default/view/login.html"
-  "templates/default/view/dashboard.html"
-  "templates/default/view/not_found.html"
+  "templates/default/view/layout.skin"
+  "templates/default/view/home.skin"
+  "templates/default/view/register.skin"
+  "templates/default/view/login.skin"
+  "templates/default/view/dashboard.skin"
+  "templates/default/view/not_found.skin"
   "templates/default/ui_components/l1/base_styles.scales"
   "templates/default/ui_components/l2/page_shell.scales"
   "templates/default/ui_components/l2/auth_form.scales"
@@ -116,24 +116,28 @@ grep -q "COPY model ./model" templates/default/Dockerfile
 grep -q "COPY controller ./controller" templates/default/Dockerfile
 grep -q "COPY view ./view" templates/default/Dockerfile
 grep -q "COPY ui_components ./ui_components" templates/default/Dockerfile
-grep -q "{{ title }}" templates/default/view/layout.html
-grep -q '<s-l1.base-styles />' templates/default/view/layout.html
-grep -q '<s-l2.page-shell :content="content" />' templates/default/view/layout.html
+grep -q "{{ title }}" templates/default/view/layout.skin
+grep -q '<s-l1.base-styles />' templates/default/view/layout.skin
+grep -q '<s-l2.page-shell :content="content" />' templates/default/view/layout.skin
 grep -q "{!! content !!}" templates/default/ui_components/l2/page_shell.scales
-grep -q '<s-l3.home-page :app-name="app_name" />' templates/default/view/home.html
-grep -q '<s-l3.login-page :auth-title="auth_title" :auth-action="auth_action" :email-value="email_value" :password-autocomplete="password_autocomplete" :submit-label="submit_label" :error="error" :auth-footer="auth_footer" />' templates/default/view/login.html
-grep -q '<s-l3.register-page :auth-title="auth_title" :auth-action="auth_action" :email-value="email_value" :password-autocomplete="password_autocomplete" :submit-label="submit_label" :error="error" :auth-footer="auth_footer" />' templates/default/view/register.html
-grep -q '<s-l3.dashboard-page :user-email="user_email" />' templates/default/view/dashboard.html
-grep -q '<s-l3.not-found-page />' templates/default/view/not_found.html
+grep -q '<s-l3.home-page :app-name="app_name" />' templates/default/view/home.skin
+grep -q '<s-l3.login-page :auth-title="auth_title" :auth-action="auth_action" :email-value="email_value" :password-autocomplete="password_autocomplete" :submit-label="submit_label" :error="error" :auth-footer="auth_footer" />' templates/default/view/login.skin
+grep -q '<s-l3.register-page :auth-title="auth_title" :auth-action="auth_action" :email-value="email_value" :password-autocomplete="password_autocomplete" :submit-label="submit_label" :error="error" :auth-footer="auth_footer" />' templates/default/view/register.skin
+grep -q '<s-l3.dashboard-page :user-email="user_email" />' templates/default/view/dashboard.skin
+grep -q '<s-l3.not-found-page />' templates/default/view/not_found.skin
 grep -q "{{ user_email }}" templates/default/ui_components/l3/dashboard_page.scales
 grep -q '<s-l2.auth-form :auth-title="auth_title" :auth-action="auth_action" :email-value="email_value" :password-autocomplete="password_autocomplete" :submit-label="submit_label" :error="error" :auth-footer="auth_footer" />' templates/default/ui_components/l3/login_page.scales
 grep -q '<s-l2.auth-form :auth-title="auth_title" :auth-action="auth_action" :email-value="email_value" :password-autocomplete="password_autocomplete" :submit-label="submit_label" :error="error" :auth-footer="auth_footer" />' templates/default/ui_components/l3/register_page.scales
 ! grep -R "{% component" templates/default/view templates/default/ui_components README.md docs >/dev/null
 grep -q "render_template_text" templates/default/src/main.c
 grep -q "respond_view" templates/default/src/main.c
+grep -q "view/%s.skin" templates/default/src/main.c
+grep -q "view/layout.skin" templates/default/src/main.c
+! grep -q "view/%s.html" templates/default/src/main.c
 grep -q "ui_components/%s.scales" templates/default/src/main.c
 ! grep -q "<style>" templates/default/src/main.c
 ! grep -R "<style>" templates/default/view >/dev/null
+! find templates/default/view -name '*.html' -print -quit | grep -q .
 ! find templates/default/ui_components -name '*.html' -print -quit | grep -q .
 ! grep -R "views/" templates/default README.md docs >/dev/null
 grep -q "listening inside container" templates/default/src/main.c

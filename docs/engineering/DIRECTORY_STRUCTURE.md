@@ -60,12 +60,12 @@ generated apps, infrastructure, tests, and documentation have clear ownership.
 |       |   |-- l2/
 |       |   `-- l3/
 |       `-- view/
-|           |-- dashboard.html
-|           |-- home.html
-|           |-- layout.html
-|           |-- login.html
-|           |-- not_found.html
-|           `-- register.html
+|           |-- dashboard.skin
+|           |-- home.skin
+|           |-- layout.skin
+|           |-- login.skin
+|           |-- not_found.skin
+|           `-- register.skin
 |-- tests/
 |   |-- fixtures/
 |   |-- integration/
@@ -94,8 +94,8 @@ generated apps, infrastructure, tests, and documentation have clear ownership.
   `sealion init`.
 - `templates/default/model/`: generated Postgres-backed model code.
 - `templates/default/controller/`: generated request-flow handlers.
-- `templates/default/view/`: thin starter templates that import components and
-  pass data into them.
+- `templates/default/view/`: thin `.skin` starter templates that import
+  `.scales` components and pass data into them.
 - `templates/default/ui_components/`: generated `.scales` components organized
   into `l1`, `l2`, and `l3`.
 - `tests/fixtures/`: shared test fixtures.

@@ -33,11 +33,12 @@ When Docker Compose supports file watch, `sealion run dev` starts the stack with
 Compose watch enabled. Edits under `src/`, `model/`, `controller/`, `view/`,
 `ui_components/`, or to `Dockerfile` rebuild and replace the app container.
 
-Generated apps keep page flow in `view/*.html`, but UI implementation belongs in
+Generated apps keep page flow in `view/*.skin`, but UI implementation belongs in
 `.scales` components under `ui_components/l1`, `ui_components/l2`, and
 `ui_components/l3`. The starter renderer supports escaped variables with
 `{{ name }}`, trusted raw slots with `{!! content !!}`, and Blade-like Scale tags
 with explicit props, such as `<s-l3.example :title="page_title" label="Save" />`.
+In this model, `.scales` components attach to `.skin` view files.
 
 The generated app includes:
 

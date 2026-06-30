@@ -40,7 +40,7 @@ ui_components/
 `-- l3/
 ```
 
-Views import components and pass data through variables:
+`.skin` views import `.scales` components and pass data through variables:
 
 ```html
 <s-l3.dashboard-page :user-email="user_email" />

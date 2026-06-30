@@ -27,7 +27,7 @@ sealion run dev</code></pre>
         <p>If port 8080 is already in use, <code>sealion run dev</code> selects another local port. To choose one explicitly, run <code>SEALION_HTTP_PORT=18080 sealion run dev</code>.</p>
         <p>The app listens on port 8080 inside the container. Your browser should use the host URL printed by the CLI and app logs.</p>
         <p>When Docker Compose supports file watch, <code>sealion run dev</code> starts the stack with Compose watch enabled. Edits under <code>src/</code>, <code>model/</code>, <code>controller/</code>, <code>view/</code>, <code>ui_components/</code>, or to <code>Dockerfile</code> rebuild and replace the app container.</p>
-        <p>Generated apps keep page flow in <code>view/*.html</code>, but UI implementation belongs in <code>.scales</code> components under <code>ui_components/l1</code>, <code>ui_components/l2</code>, and <code>ui_components/l3</code>. Views pass props into components with Blade-like Scale tags such as <code>&lt;s-l3.dashboard-page :user-email="user_email" /&gt;</code>.</p>
+        <p>Generated apps keep page flow in <code>view/*.skin</code>, but UI implementation belongs in <code>.scales</code> components under <code>ui_components/l1</code>, <code>ui_components/l2</code>, and <code>ui_components/l3</code>. In this model, <code>.scales</code> components attach to <code>.skin</code> view files through Blade-like Scale tags such as <code>&lt;s-l3.dashboard-page :user-email="user_email" /&gt;</code>.</p>
       </section>
 
       <section>

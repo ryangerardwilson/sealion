@@ -34,16 +34,17 @@ Generated apps start with an MVC shape:
 
 - `model/` owns Postgres-backed data access.
 - `controller/` owns request flow and response decisions.
-- `view/` owns thin templates that pass information into components.
+- `view/` owns thin `.skin` templates that pass information into components.
 - `ui_components/l1/`, `ui_components/l2/`, and `ui_components/l3/` own UI
   markup and styling.
 
-Edit component markup in `ui_components/**/*.scales`. View files in `view/`
+Edit component markup in `ui_components/**/*.scales`. Skin files in `view/`
 should only import components and pass props, for example
 `<s-l3.example :title="page_title" label="Save" />`. Components receive only the
 props passed by their caller. `s-l3.dashboard-page` maps to
-`ui_components/l3/dashboard_page.scales`. Sealion renders escaped variables with
-`{{ name }}` and trusted raw slots with `{!! content !!}`.
+`ui_components/l3/dashboard_page.scales`. Sealion renders `.scales` components
+inside `.skin` views, with escaped variables via `{{ name }}` and trusted raw
+slots via `{!! content !!}`.
 
 Demo login:
 
