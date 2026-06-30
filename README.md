@@ -11,8 +11,8 @@ C feel coherent, productive, and safe enough to be practical.
 C is a difficult language for high-level web application development, but a
 strict framework can remove many repeated decisions:
 
-- one mandatory development and production container
-- one mandatory Postgres database container
+- one mandatory app container image
+- one mandatory Postgres service container
 - one project layout
 - one request lifecycle
 - one database migration path
@@ -24,14 +24,15 @@ Sealion should make the hard parts visible instead of hiding them behind magic.
 
 ## Core Principles
 
-- **Container-first:** every app runs inside the official Sealion container.
+- **Container-first:** every app runs inside the official Sealion app
+  container.
 - **Postgres-only:** Sealion targets Postgres as the mandatory database, not as
   one interchangeable adapter among many.
 - **Separate runtime boundaries:** the app container and database container are
   separate services with separate lifecycles, health checks, logs, and storage.
-- **Infrastructure as code:** every runtime dependency, service boundary,
-  volume, network, secret contract, environment variable, health check, and
-  deploy target must be described in checked-in code.
+- **Infrastructure as code:** every supported runtime dependency, service
+  boundary, volume, network, secret contract, environment variable, health
+  check, and deploy target must be described in checked-in code.
 - **Explicit ownership:** request memory, response memory, and database handles
   must have clear lifetimes.
 - **Convention over configuration:** defaults should cover normal apps without
@@ -73,20 +74,24 @@ Sealion apps must be reproducible from the repository. Runtime behavior should
 not depend on manual console setup, undocumented shell history, or hidden
 machine state.
 
+The first supported infrastructure target is a generated Docker Compose setup
+for local development. Production targets come later, one at a time, after the
+local app and Postgres contract is stable.
+
 At minimum, each app must keep these contracts in version control:
 
 - container definitions for the app and required services;
 - service networking, health checks, restart policy, and readiness rules;
 - Postgres image version, volume, backup, restore, and migration policy;
 - environment variable schema with required, optional, and secret values;
-- deployment manifests or generated deployment targets for supported platforms;
+- generated local Compose manifests first, then deployment manifests for each
+  supported production target as those targets become official;
 - framework and app version gates for infrastructure changes.
 
 The Sealion CLI should generate and validate these files instead of asking
-developers to maintain ad hoc infrastructure by hand. Local Compose files can be
-the first implementation, but the product contract is broader: infrastructure is
-part of the application source, and changes to it must be reviewable, diffable,
-and recoverable.
+developers to maintain ad hoc infrastructure by hand. Infrastructure is part of
+the application source, and changes to it must be reviewable, diffable, and
+recoverable.
 
 ## Roadmap
 
@@ -145,7 +150,7 @@ and recoverable.
 
 ### Phase 6: Background Work
 
-- Add Redis-backed queues.
+- Add Postgres-backed queues.
 - Add scheduled jobs.
 - Add mail driver contracts.
 - Add cache contracts.
@@ -164,7 +169,8 @@ and recoverable.
 ### Phase 8: Production Contract
 
 - Define the official production image.
-- Define production infrastructure-as-code outputs for supported deploy targets.
+- Define the first production infrastructure-as-code target after local Compose
+  is stable.
 - Add health checks and readiness checks.
 - Add structured logs suitable for container platforms.
 - Add deployment examples for a single-node app and a worker process.
@@ -188,5 +194,5 @@ The first milestone is a containerized app that can:
 5. connect to the required Postgres container,
 6. shut down cleanly.
 
-That milestone proves the core loop before the project adds database, auth, or
-template complexity.
+That milestone proves the core loop before the project adds migrations, auth,
+templates, queues, or higher-level database features.
