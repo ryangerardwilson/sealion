@@ -124,7 +124,9 @@ sealion run dev
 `sealion new <project-name>` creates a new project directory. `sealion init`
 initializes the current directory only when it is empty. `sealion run dev`
 starts the generated app and Postgres containers with register, login, logout,
-and dashboard routes already wired.
+and dashboard routes already wired. It prefers `http://localhost:8080`, but
+automatically selects another local port when 8080 is already in use. Set
+`SEALION_HTTP_PORT=<port>` to choose the host port explicitly.
 
 ## Roadmap
 

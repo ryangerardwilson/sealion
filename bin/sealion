@@ -144,12 +144,77 @@ compose_command() {
   fail "Docker Compose is required for sealion run dev"
 }
 
+port_is_available() {
+  local port="$1"
+  if command -v python3 >/dev/null 2>&1; then
+    python3 - "$port" <<'PY'
+import socket
+import sys
+
+port = int(sys.argv[1])
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+try:
+    sock.bind(("0.0.0.0", port))
+except OSError:
+    sys.exit(1)
+finally:
+    sock.close()
+PY
+    return
+  fi
+
+  if command -v ss >/dev/null 2>&1; then
+    ! ss -ltn | awk '{print $4}' | grep -Eq "[:.]${port}$"
+    return
+  fi
+
+  return 0
+}
+
+validate_port() {
+  local port="$1"
+  case "$port" in
+    ""|*[!0-9]*) fail "SEALION_HTTP_PORT must be a number from 1 to 65535" ;;
+  esac
+  if [ "$port" -lt 1 ] || [ "$port" -gt 65535 ]; then
+    fail "SEALION_HTTP_PORT must be a number from 1 to 65535"
+  fi
+}
+
+choose_dev_port() {
+  local candidate
+
+  if [ -n "${SEALION_HTTP_PORT:-}" ]; then
+    validate_port "$SEALION_HTTP_PORT"
+    if ! port_is_available "$SEALION_HTTP_PORT"; then
+      fail "port $SEALION_HTTP_PORT is already in use; choose another with SEALION_HTTP_PORT=<port> sealion run dev"
+    fi
+    printf '%s\n' "$SEALION_HTTP_PORT"
+    return
+  fi
+
+  for candidate in 8080 8081 8082 8083 8084 8085 18080 18081 18082 18083 18084 18085; do
+    if port_is_available "$candidate"; then
+      printf '%s\n' "$candidate"
+      return
+    fi
+  done
+
+  fail "no free dev port found; run with SEALION_HTTP_PORT=<port> sealion run dev"
+}
+
 command_run_dev() {
   [ -f "$PWD/sealion.toml" ] || fail "run this inside a Sealion project"
-  local compose port
+  local compose port requested_port
   compose="$(compose_command)"
-  port="${SEALION_HTTP_PORT:-8080}"
+  requested_port="${SEALION_HTTP_PORT:-}"
+  port="$(choose_dev_port)"
+  export SEALION_HTTP_PORT="$port"
   printf 'starting Sealion dev stack\n'
+  if [ -z "$requested_port" ] && [ "$port" != "8080" ]; then
+    printf 'port 8080 is busy; using %s\n' "$port"
+  fi
   printf 'app: http://localhost:%s\n' "$port"
   printf 'demo login: admin@sealion.local / password\n'
   # shellcheck disable=SC2086

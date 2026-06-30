@@ -36,5 +36,62 @@ if "$repo_root/bin/sealion" init >/tmp/sealion-init.out 2>/tmp/sealion-init.err;
 fi
 grep -q "requires an empty directory" /tmp/sealion-init.err
 
-printf 'cli scaffold ok\n'
+if command -v python3 >/dev/null 2>&1; then
+  fake_bin="$tmp_dir/fake-bin"
+  port_file="$tmp_dir/selected-port"
+  mkdir "$fake_bin"
+  cat > "$fake_bin/docker" <<'SH'
+#!/usr/bin/env bash
+set -euo pipefail
 
+if [ "${1:-}" = "compose" ] && [ "${2:-}" = "version" ]; then
+  printf 'Docker Compose fake\n'
+  exit 0
+fi
+
+if [ "${1:-}" = "compose" ] && [ "${2:-}" = "up" ]; then
+  printf '%s\n' "${SEALION_HTTP_PORT:-}" > "$FAKE_DOCKER_PORT_FILE"
+  exit 0
+fi
+
+printf 'unexpected fake docker command: %s\n' "$*" >&2
+exit 1
+SH
+  chmod +x "$fake_bin/docker"
+
+  python3 - <<'PY' &
+import socket
+import sys
+import time
+
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+try:
+    sock.bind(("0.0.0.0", 8080))
+    sock.listen(1)
+except OSError:
+    sys.exit(0)
+time.sleep(60)
+PY
+  listener_pid="$!"
+  sleep 0.5
+
+  cd "$tmp_dir/demo"
+  PATH="$fake_bin:$PATH" FAKE_DOCKER_PORT_FILE="$port_file" "$repo_root/bin/sealion" run dev > "$tmp_dir/run-dev.out"
+  grep -q "app: http://localhost:" "$tmp_dir/run-dev.out"
+  selected_port="$(cat "$port_file")"
+  if [ "$selected_port" = "8080" ]; then
+    printf 'sealion run dev should not select occupied port 8080\n' >&2
+    exit 1
+  fi
+
+  if PATH="$fake_bin:$PATH" FAKE_DOCKER_PORT_FILE="$port_file" SEALION_HTTP_PORT=8080 "$repo_root/bin/sealion" run dev > "$tmp_dir/explicit-port.out" 2> "$tmp_dir/explicit-port.err"; then
+    printf 'explicit occupied SEALION_HTTP_PORT should fail before compose starts\n' >&2
+    exit 1
+  fi
+  grep -q "port 8080 is already in use" "$tmp_dir/explicit-port.err"
+
+  kill "$listener_pid" >/dev/null 2>&1 || true
+fi
+
+printf 'cli scaffold ok\n'

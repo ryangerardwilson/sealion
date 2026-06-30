@@ -19,7 +19,8 @@ Then open:
 http://localhost:8080
 ```
 
-If port 8080 is already in use:
+If port 8080 is already in use, `sealion run dev` selects another local port.
+To choose one explicitly:
 
 ```sh
 SEALION_HTTP_PORT=18080 sealion run dev
