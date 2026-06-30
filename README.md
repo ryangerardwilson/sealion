@@ -12,6 +12,7 @@ C is a difficult language for high-level web application development, but a
 strict framework can remove many repeated decisions:
 
 - one mandatory development and production container
+- one mandatory Postgres database container
 - one project layout
 - one request lifecycle
 - one database migration path
@@ -23,6 +24,10 @@ Sealion should make the hard parts visible instead of hiding them behind magic.
 ## Core Principles
 
 - **Container-first:** every app runs inside the official Sealion container.
+- **Postgres-only:** Sealion targets Postgres as the mandatory database, not as
+  one interchangeable adapter among many.
+- **Separate runtime boundaries:** the app container and database container are
+  separate services with separate lifecycles, health checks, logs, and storage.
 - **Explicit ownership:** request memory, response memory, and database handles
   must have clear lifetimes.
 - **Convention over configuration:** defaults should cover normal apps without
@@ -40,14 +45,32 @@ Sealion should make the hard parts visible instead of hiding them behind magic.
 - Full Laravel API compatibility.
 - A general-purpose C package manager.
 - ORM magic that depends on runtime reflection C does not have.
-- Supporting every database, web server, or deployment target in the first
-  versions.
+- Supporting multiple databases, web servers, or deployment targets in the
+  first versions.
+
+## Runtime Topology
+
+The default Sealion app runs as at least two containers:
+
+1. the Sealion app container, which owns HTTP, routing, application code,
+   migrations, workers, logs, and framework tooling;
+2. the Postgres database container, which owns durable relational state through
+   a mounted volume or managed persistent storage.
+
+The containers communicate over a private container network. The app depends on
+Postgres readiness, but Postgres must remain independently restartable,
+backed-up, restored, and upgraded. Local development can use a generated Compose
+file, but the architectural contract is service separation rather than a single
+container running both processes.
 
 ## Roadmap
 
 ### Phase 0: Project Contract
 
 - Define the official container image and supported Linux base.
+- Define the official Postgres image, version policy, storage contract, and
+  connection environment variables.
+- Define the default two-container Compose topology for local development.
 - Choose compiler, libc, build system, formatter, and test runner.
 - Create the canonical app directory layout.
 - Define the request, response, app, and service lifecycle contracts.
@@ -78,10 +101,11 @@ Sealion should make the hard parts visible instead of hiding them behind magic.
 
 ### Phase 4: Database Layer
 
-- Start with Postgres as the first supported database.
+- Use Postgres as the required database.
 - Add connection pooling.
 - Add migrations with up/down support.
 - Add a query builder with parameter binding by default.
+- Add schema inspection helpers for Postgres-specific capabilities.
 - Explore a constrained model layer without pretending C has Eloquent-style
   reflection.
 
@@ -133,7 +157,8 @@ The first milestone is a containerized app that can:
 2. serve a route,
 3. return JSON,
 4. write one structured request log line,
-5. shut down cleanly.
+5. connect to the required Postgres container,
+6. shut down cleanly.
 
 That milestone proves the core loop before the project adds database, auth, or
 template complexity.
