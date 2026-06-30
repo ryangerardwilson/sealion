@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sealion Documentation</title>
+    <meta name="description" content="Sealion is an experimental Laravel-inspired full-stack web framework for C.">
+    <link rel="stylesheet" href="assets/styles.css">
+  </head>
+  <body>
+    <header class="hero">
+      <div class="shell">
+        <p class="eyebrow">Sealion docs</p>
+        <h1>A full-stack C framework with a narrow runtime contract.</h1>
+        <p class="lead">Sealion starts with one app container image, one Postgres service container, checked-in infrastructure, and regression tests that protect the framework before it grows.</p>
+        <nav class="nav" aria-label="Documentation">
+          <a href="ci-cd-regression-tests.html">CI/CD regression plan</a>
+          <a href="repo-structure.html">Directory structure</a>
+          <a href="https://github.com/ryangerardwilson/sealion">GitHub</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="shell grid">
+      <div>
+        <section>
+          <h2>Product Contract</h2>
+          <ul>
+            <li>Apps run in the official Sealion app container.</li>
+            <li>Postgres is mandatory, not one adapter among many.</li>
+            <li>The app and database stay in separate containers.</li>
+            <li>Infrastructure belongs in version-controlled code.</li>
+            <li>The first IaC target is generated Docker Compose for local development.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>First Milestone</h2>
+          <ol>
+            <li>Boot with one command.</li>
+            <li>Serve a route.</li>
+            <li>Return JSON.</li>
+            <li>Write one structured request log line.</li>
+            <li>Connect to the required Postgres container.</li>
+            <li>Shut down cleanly.</li>
+          </ol>
+        </section>
+
+        <section>
+          <h2>Current Automation</h2>
+          <p>The repo now has a CI gate for contract checks and a GitHub Pages workflow that publishes this documentation site from <code>docs/site</code> after pushes to <code>main</code>.</p>
+        </section>
+      </div>
+
+      <aside class="system-map" aria-label="Sealion runtime map">
+        <div class="node">
+          <strong>Repository</strong>
+          <p class="meta">README, docs, workflows, scripts, source, tests, and infrastructure contracts.</p>
+        </div>
+        <div class="arrow">down</div>
+        <div class="node">
+          <strong>CI</strong>
+          <p class="meta">Contract checks now; C, sanitizer, Postgres, container, and CLI suites next.</p>
+        </div>
+        <div class="arrow">down</div>
+        <div class="node">
+          <strong>GitHub Pages</strong>
+          <p class="meta">Published at <code>sealion.ryangerardwilson.com</code>.</p>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="footer">
+      <div class="shell">Sealion documentation is published from the public GitHub repository.</div>
+    </footer>
+  </body>
+</html>
+

@@ -93,6 +93,18 @@ developers to maintain ad hoc infrastructure by hand. Infrastructure is part of
 the application source, and changes to it must be reviewable, diffable, and
 recoverable.
 
+## Documentation And Automation
+
+The public documentation site is published from `docs/site` to GitHub Pages at:
+
+```text
+https://sealion.ryangerardwilson.com
+```
+
+CI starts with repository contract checks and grows into the full framework
+regression suite described in `docs/engineering/CI_CD_REGRESSION_TESTS.md`.
+The planned repo layout lives in `docs/engineering/DIRECTORY_STRUCTURE.md`.
+
 ## Roadmap
 
 ### Phase 0: Project Contract

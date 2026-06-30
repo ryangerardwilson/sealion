@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Directory Structure | Sealion</title>
+    <meta name="description" content="The initial repository structure for Sealion.">
+    <link rel="stylesheet" href="assets/styles.css">
+  </head>
+  <body>
+    <header class="hero">
+      <div class="shell">
+        <p class="eyebrow"><a href="index.html">Sealion docs</a></p>
+        <h1>Directory structure</h1>
+        <p class="lead">The repo separates framework source, public headers, tests, examples, infrastructure, automation, and published documentation from the start.</p>
+      </div>
+    </header>
+
+    <main class="shell">
+      <section>
+        <h2>Layout</h2>
+        <pre><code>.
+|-- .github/workflows/
+|-- docs/engineering/
+|-- docs/site/
+|-- examples/hello/
+|-- include/sealion/
+|-- infra/compose/
+|-- infra/schemas/
+|-- scripts/
+|-- src/
+|-- tests/fixtures/
+|-- tests/integration/
+|-- tests/regression/
+`-- tests/unit/</code></pre>
+      </section>
+
+      <section>
+        <h2>Ownership</h2>
+        <ul>
+          <li><strong>.github/workflows:</strong> CI and documentation deployment.</li>
+          <li><strong>docs/engineering:</strong> source-of-truth engineering plans.</li>
+          <li><strong>docs/site:</strong> static GitHub Pages artifact.</li>
+          <li><strong>examples:</strong> generated or hand-written sample apps.</li>
+          <li><strong>include/sealion:</strong> public C headers.</li>
+          <li><strong>infra:</strong> Compose templates and infrastructure schemas.</li>
+          <li><strong>scripts:</strong> repo-owned checks and maintenance commands.</li>
+          <li><strong>src:</strong> framework implementation.</li>
+          <li><strong>tests:</strong> fixtures, unit, integration, and regression coverage.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Rule</h2>
+        <p>Empty directories are placeholders until a real file belongs there. When a directory gains behavior, its first file should make that behavior testable.</p>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="shell"><a href="index.html">Back to docs home</a></div>
+    </footer>
+  </body>
+</html>
+

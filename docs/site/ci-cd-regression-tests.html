@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CI/CD Regression Plan | Sealion</title>
+    <meta name="description" content="The CI/CD regression plan for Sealion.">
+    <link rel="stylesheet" href="assets/styles.css">
+  </head>
+  <body>
+    <header class="hero">
+      <div class="shell">
+        <p class="eyebrow"><a href="index.html">Sealion docs</a></p>
+        <h1>CI/CD regression plan</h1>
+        <p class="lead">The test system starts with repository contracts and grows into C runtime, Postgres, container, IaC, security, and documentation regression suites.</p>
+      </div>
+    </header>
+
+    <main class="shell">
+      <section>
+        <h2>Required Gates</h2>
+        <h3>Pull Request Gate</h3>
+        <ul>
+          <li>Repository contract checks.</li>
+          <li>Shell syntax checks for repo-owned scripts.</li>
+          <li>Documentation site contract checks.</li>
+          <li>Future C format, compile, unit, sanitizer, and integration checks.</li>
+        </ul>
+        <h3>Main Branch Gate</h3>
+        <ul>
+          <li>The pull request gate.</li>
+          <li>Documentation deployment to GitHub Pages.</li>
+          <li>Future release candidate smoke checks.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Regression Suites</h2>
+        <ul>
+          <li><strong>Repository contract:</strong> protects required files, docs, workflows, and product constraints.</li>
+          <li><strong>C compile and ABI:</strong> protects public headers, examples, symbols, and release compatibility.</li>
+          <li><strong>Unit tests:</strong> protects router, request, response, middleware, config, and logging behavior.</li>
+          <li><strong>Sanitizers:</strong> exposes memory ownership, undefined behavior, and leaks.</li>
+          <li><strong>Postgres integration:</strong> tests readiness, pooling, migrations, transactions, and parameterized queries.</li>
+          <li><strong>Container and IaC:</strong> validates Compose generation, service separation, health checks, and environment schemas.</li>
+          <li><strong>CLI golden tests:</strong> protects scaffolding, deterministic generated files, and actionable command errors.</li>
+          <li><strong>Security regression:</strong> protects cookies, CSRF, upload limits, SQL parameterization, and secret handling.</li>
+          <li><strong>Documentation regression:</strong> keeps examples, links, and published docs aligned with framework behavior.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Implemented Now</h2>
+        <pre><code>bash -n scripts/*.sh
+bash scripts/check_repo_contract.sh</code></pre>
+        <p>The source plan is maintained in <code>docs/engineering/CI_CD_REGRESSION_TESTS.md</code>.</p>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="shell"><a href="index.html">Back to docs home</a></div>
+    </footer>
+  </body>
+</html>
+
