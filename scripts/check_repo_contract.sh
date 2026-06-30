@@ -153,7 +153,9 @@ grep -q "handle_api_dashboard" templates/default/src/main.c
 grep -q "API listening inside backend container" templates/default/src/main.c
 grep -q "frontend proxies API calls" templates/default/src/main.c
 grep -q "compose.supports(\"--watch\")" cmd/sealion/main.go
-grep -q "watch   enabled" cmd/sealion/main.go
+grep -q "newRenderer" cmd/sealion/main.go
+grep -q "streamComposeOutput" cmd/sealion/main.go
+grep -q 'outputRow{"watch", "enabled"}' cmd/sealion/main.go
 
 grep -q "$domain" docs/site/index.html
 grep -q "Bun frontend" docs/site/index.html

@@ -1,6 +1,11 @@
 package main
 
-import "testing"
+import (
+	"bytes"
+	"strings"
+	"sync"
+	"testing"
+)
 
 func TestProjectSlug(t *testing.T) {
 	tests := map[string]string{
@@ -47,5 +52,44 @@ func TestValidatePort(t *testing.T) {
 	}
 	if got != 8080 {
 		t.Fatalf("validatePort returned %d, want 8080", got)
+	}
+}
+
+func TestRendererPlainOutput(t *testing.T) {
+	var out bytes.Buffer
+	newRenderer(&out).Message(
+		"Sealion",
+		"project created",
+		outputRow{"path", "/tmp/demo"},
+		outputRow{"next", "cd demo"},
+		outputRow{"", "sealion run dev"},
+	)
+
+	want := "Sealion\nproject created\n\npath  /tmp/demo\nnext  cd demo\n      sealion run dev\n"
+	if out.String() != want {
+		t.Fatalf("renderer output = %q, want %q", out.String(), want)
+	}
+}
+
+func TestRendererIndentsMultilineValues(t *testing.T) {
+	var out bytes.Buffer
+	newRenderer(&out).Rows(outputRow{"error", "first line\nsecond line"})
+
+	want := "error  first line\n       second line\n"
+	if out.String() != want {
+		t.Fatalf("renderer output = %q, want %q", out.String(), want)
+	}
+}
+
+func TestStreamComposeOutputFiltersNoise(t *testing.T) {
+	var out bytes.Buffer
+	var wg sync.WaitGroup
+	wg.Add(1)
+	streamComposeOutput(strings.NewReader("Watch enabled\n\nrebuilt backend\n"), newRenderer(&out), &wg)
+	wg.Wait()
+
+	want := "compose  rebuilt backend\n"
+	if out.String() != want {
+		t.Fatalf("compose output = %q, want %q", out.String(), want)
 	}
 }

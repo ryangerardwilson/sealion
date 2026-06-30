@@ -31,7 +31,8 @@ Sealion should make the hard parts visible instead of hiding them behind magic.
 - **Container-first:** every app runs through generated containers, not host
   Bun, host compiler setup, or hidden local services.
 - **Go CLI:** `sealion` is a compiled Go CLI. It owns scaffolding, upgrades,
-  local port selection, and the Docker Compose development lifecycle.
+  local port selection, structured terminal output, and the Docker Compose
+  development lifecycle.
 - **React default frontend:** the browser UI lives in the frontend container.
   Bun, React, and Tailwind are required inside that container, not on the
   developer's host machine.
@@ -152,6 +153,9 @@ quiet Compose output and watch enabled. Edits under `view/web/src/`, `src/`,
 `model/`, `controller/`, view package/config files, or `Dockerfile` rebuild and
 replace the relevant container. Use `docker compose logs -f` when you want raw
 container logs.
+
+CLI output is rendered through a small Go output layer: headings, aligned labels,
+TTY-only muted styling, and plain text when piped or captured by scripts.
 
 Generated apps use an MVC shape. `view/web/` owns the Bun server, Tailwind
 build, browser UI, and same-origin `/api` calls. `model/` owns

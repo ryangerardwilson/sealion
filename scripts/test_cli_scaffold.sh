@@ -167,9 +167,10 @@ PY
   cd "$tmp_dir/demo"
   PATH="$fake_bin:$PATH" FAKE_DOCKER_PORT_FILE="$port_file" FAKE_DOCKER_ARGS_FILE="$args_file" "$repo_root/bin/sealion" run dev > "$tmp_dir/run-dev.out"
   grep -q "Sealion dev" "$tmp_dir/run-dev.out"
-  grep -q "app     http://localhost:" "$tmp_dir/run-dev.out"
-  grep -q "api     http://localhost:" "$tmp_dir/run-dev.out"
-  grep -q "watch   enabled" "$tmp_dir/run-dev.out"
+  grep -Eq "^app[[:space:]]+http://localhost:" "$tmp_dir/run-dev.out"
+  grep -Eq "^api[[:space:]]+http://localhost:" "$tmp_dir/run-dev.out"
+  grep -Eq "^watch[[:space:]]+enabled" "$tmp_dir/run-dev.out"
+  ! grep -q "^Watch enabled$" "$tmp_dir/run-dev.out"
   grep -q -- "--quiet-build" "$args_file"
   grep -q -- "--quiet-pull" "$args_file"
   grep -q "compose watch --no-up --quiet" "$args_file"
@@ -208,7 +209,8 @@ git -C "$installed_repo" push -u origin main >/dev/null
 git --git-dir="$remote_repo" symbolic-ref HEAD refs/heads/main
 
 SEALION_HOME="$installed_repo" "$repo_root/bin/sealion" upgrade > "$tmp_dir/upgrade-current.out"
-grep -q "already up to date" "$tmp_dir/upgrade-current.out"
+grep -q "Sealion upgrade" "$tmp_dir/upgrade-current.out"
+grep -Eq "^status[[:space:]]+up to date" "$tmp_dir/upgrade-current.out"
 
 git clone --branch main "$remote_repo" "$upgrade_work" >/dev/null
 printf '# changed\n' >> "$upgrade_work/README.md"
@@ -217,7 +219,8 @@ git -C "$upgrade_work" -c user.name="Sealion Test" -c user.email="test@sealion.l
 git -C "$upgrade_work" push >/dev/null
 
 SEALION_HOME="$installed_repo" "$repo_root/bin/sealion" upgrade > "$tmp_dir/upgrade-new.out"
-grep -q "upgraded sealion" "$tmp_dir/upgrade-new.out"
+grep -q "Sealion upgrade" "$tmp_dir/upgrade-new.out"
+grep -Eq "^status[[:space:]]+upgraded" "$tmp_dir/upgrade-new.out"
 test -x "$installed_repo/.bin/sealion"
 
 printf 'cli scaffold ok\n'

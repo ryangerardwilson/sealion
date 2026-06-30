@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"errors"
 	"fmt"
@@ -14,6 +15,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"syscall"
 	"time"
 )
@@ -62,10 +64,20 @@ type composeCommand struct {
 	help string
 }
 
+type renderer struct {
+	out    io.Writer
+	styled bool
+}
+
+type outputRow struct {
+	key   string
+	value string
+}
+
 func main() {
 	home, err := resolveHome()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "sealion: %v\n", err)
+		renderError(os.Stderr, err)
 		os.Exit(1)
 	}
 
@@ -76,7 +88,7 @@ func main() {
 	}
 
 	if err := a.run(os.Args[1:]); err != nil {
-		fmt.Fprintf(os.Stderr, "sealion: %v\n", err)
+		renderError(os.Stderr, err)
 		os.Exit(1)
 	}
 }
@@ -125,7 +137,7 @@ func (a app) run(args []string) error {
 }
 
 func (a app) printHelp() {
-	if shouldStyleHelp(a.stdout) {
+	if shouldStyleOutput(a.stdout) {
 		fmt.Fprintf(a.stdout, "\033[38;5;245m%s\033[0m", helpText)
 		return
 	}
@@ -133,13 +145,24 @@ func (a app) printHelp() {
 }
 
 func (a app) commandVersion() error {
-	label := version
+	r := newRenderer(a.stdout)
 	if commit != "" {
-		label = fmt.Sprintf("%s (%s)", label, commit)
+		r.Title("Sealion", "installed CLI")
+		r.Rows(
+			outputRow{"version", version},
+			outputRow{"commit", commit},
+		)
+		return nil
 	} else if head := gitShortHead(a.home); head != "" {
-		label = fmt.Sprintf("%s (%s)", label, head)
+		r.Title("Sealion", "installed CLI")
+		r.Rows(
+			outputRow{"version", version},
+			outputRow{"commit", head},
+		)
+		return nil
 	}
-	fmt.Fprintf(a.stdout, "sealion %s\n", label)
+	r.Title("Sealion", "installed CLI")
+	r.Rows(outputRow{"version", version})
 	return nil
 }
 
@@ -166,10 +189,13 @@ func (a app) commandNew(name string) error {
 		return err
 	}
 
-	fmt.Fprintf(a.stdout, "created %s\n", target)
-	fmt.Fprintln(a.stdout, "next:")
-	fmt.Fprintf(a.stdout, "  cd %s\n", name)
-	fmt.Fprintln(a.stdout, "  sealion run dev")
+	newRenderer(a.stdout).Message(
+		"Sealion",
+		"project created",
+		outputRow{"path", target},
+		outputRow{"next", fmt.Sprintf("cd %s", name)},
+		outputRow{"", "sealion run dev"},
+	)
 	return nil
 }
 
@@ -199,9 +225,12 @@ func (a app) commandInit() error {
 		return err
 	}
 
-	fmt.Fprintf(a.stdout, "initialized %s\n", pwd)
-	fmt.Fprintln(a.stdout, "next:")
-	fmt.Fprintln(a.stdout, "  sealion run dev")
+	newRenderer(a.stdout).Message(
+		"Sealion",
+		"project initialized",
+		outputRow{"path", pwd},
+		outputRow{"next", "sealion run dev"},
+	)
 	return nil
 }
 
@@ -231,7 +260,12 @@ func (a app) commandUpgrade() error {
 			return err
 		}
 		if currentHead == remoteHead {
-			fmt.Fprintf(a.stdout, "sealion is already up to date (%s)\n", currentHead)
+			newRenderer(a.stdout).Message(
+				"Sealion upgrade",
+				"installed CLI",
+				outputRow{"status", "up to date"},
+				outputRow{"commit", currentHead},
+			)
 			return nil
 		}
 		if _, err := commandOutput(a.home, "git", "pull", "--ff-only", "--quiet", "origin", "main"); err != nil {
@@ -244,7 +278,13 @@ func (a app) commandUpgrade() error {
 		if err := buildInstalledBinary(a.home); err != nil {
 			return err
 		}
-		fmt.Fprintf(a.stdout, "upgraded sealion %s -> %s\n", currentHead, newHead)
+		newRenderer(a.stdout).Message(
+			"Sealion upgrade",
+			"installed CLI",
+			outputRow{"status", "upgraded"},
+			outputRow{"from", currentHead},
+			outputRow{"to", newHead},
+		)
 		return nil
 	}
 
@@ -280,54 +320,73 @@ func (a app) commandRunDev() error {
 	env = setEnv(env, "COMPOSE_MENU", "false")
 	watch := compose.supports("--watch")
 
-	a.printDevHeader(port, requestedPort, watch)
-	fmt.Fprintln(a.stdout, "status  starting containers")
+	r := newRenderer(a.stdout)
+	a.printDevHeader(r, port, requestedPort, watch)
+	r.Row(outputRow{"status", "starting containers"})
 	if err := composeUpDetached(compose, env); err != nil {
 		return err
 	}
-	fmt.Fprintln(a.stdout, "status  ready")
+	r.Row(outputRow{"status", "ready"})
 
 	if !watch {
-		fmt.Fprintln(a.stdout, "watch   unavailable in this Docker Compose")
-		fmt.Fprintln(a.stdout, "logs    docker compose logs -f")
-		fmt.Fprintln(a.stdout, "stop    docker compose down")
+		r.Rows(
+			outputRow{"watch", "unavailable in this Docker Compose"},
+			outputRow{"logs", "docker compose logs -f"},
+			outputRow{"stop", "docker compose down"},
+		)
 		return nil
 	}
 
-	fmt.Fprintln(a.stdout, "watch   enabled")
-	fmt.Fprintln(a.stdout, "logs    docker compose logs -f")
-	fmt.Fprintln(a.stdout, "stop    Ctrl+C")
-	fmt.Fprintln(a.stdout)
+	r.Rows(
+		outputRow{"watch", "enabled"},
+		outputRow{"logs", "docker compose logs -f"},
+		outputRow{"stop", "Ctrl+C"},
+	)
+	r.Blank()
 
 	return a.runComposeWatch(compose, env)
 }
 
-func (a app) printDevHeader(port int, requestedPort string, watch bool) {
-	fmt.Fprintln(a.stdout, "Sealion dev")
-	fmt.Fprintln(a.stdout)
+func (a app) printDevHeader(r renderer, port int, requestedPort string, watch bool) {
+	r.Title("Sealion dev", "local stack")
 	if requestedPort == "" && port != 8080 {
-		fmt.Fprintf(a.stdout, "port    8080 busy, using %d\n", port)
+		r.Row(outputRow{"port", fmt.Sprintf("8080 busy, using %d", port)})
 	}
-	fmt.Fprintf(a.stdout, "app     http://localhost:%d\n", port)
-	fmt.Fprintf(a.stdout, "api     http://localhost:%d/api\n", port)
-	fmt.Fprintln(a.stdout, "login   admin@sealion.local / password")
+	mode := "build, start"
 	if watch {
-		fmt.Fprintln(a.stdout, "mode    build, start, and watch")
-	} else {
-		fmt.Fprintln(a.stdout, "mode    build and start")
+		mode = "build, start, watch"
 	}
+	r.Rows(
+		outputRow{"app", fmt.Sprintf("http://localhost:%d", port)},
+		outputRow{"api", fmt.Sprintf("http://localhost:%d/api", port)},
+		outputRow{"login", "admin@sealion.local / password"},
+		outputRow{"mode", mode},
+	)
+	r.Blank()
 }
 
 func (a app) runComposeWatch(compose composeCommand, env []string) error {
 	cmd := exec.Command(compose.name, compose.args("watch", "--no-up", "--quiet")...)
 	cmd.Env = env
 	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		return err
+	}
+	stderr, err := cmd.StderrPipe()
+	if err != nil {
+		return err
+	}
 
 	if err := cmd.Start(); err != nil {
 		return fmt.Errorf("Docker Compose watch failed to start: %w", err)
 	}
+
+	var streams sync.WaitGroup
+	streams.Add(2)
+	go streamComposeOutput(stdout, newRenderer(a.stdout), &streams)
+	go streamComposeOutput(stderr, newRenderer(a.stderr), &streams)
 
 	done := make(chan error, 1)
 	go func() {
@@ -344,8 +403,8 @@ func (a app) runComposeWatch(compose composeCommand, env []string) error {
 	select {
 	case sig := <-signals:
 		interrupted = true
-		fmt.Fprintln(a.stdout)
-		fmt.Fprintln(a.stdout, "status  stopping containers")
+		r := newRenderer(a.stdout)
+		r.Row(outputRow{"status", "stopping containers"})
 		_ = cmd.Process.Signal(sig)
 		select {
 		case watchErr = <-done:
@@ -356,6 +415,7 @@ func (a app) runComposeWatch(compose composeCommand, env []string) error {
 	case watchErr = <-done:
 	}
 
+	streams.Wait()
 	downErr := composeDown(compose, env)
 	if interrupted {
 		return downErr
@@ -367,6 +427,105 @@ func (a app) runComposeWatch(compose composeCommand, env []string) error {
 		return fmt.Errorf("Docker Compose watch failed: %w", watchErr)
 	}
 	return downErr
+}
+
+func newRenderer(out io.Writer) renderer {
+	return renderer{out: out, styled: shouldStyleOutput(out)}
+}
+
+func renderError(out io.Writer, err error) {
+	newRenderer(out).Message(
+		"Sealion",
+		"command failed",
+		outputRow{"error", err.Error()},
+		outputRow{"help", "sealion help"},
+	)
+}
+
+func (r renderer) Message(title string, subtitle string, rows ...outputRow) {
+	r.Title(title, subtitle)
+	r.Rows(rows...)
+}
+
+func (r renderer) Title(title string, subtitle string) {
+	if r.styled {
+		fmt.Fprintf(r.out, "\033[1m%s\033[0m\n", title)
+		if subtitle != "" {
+			fmt.Fprintf(r.out, "\033[2m%s\033[0m\n", subtitle)
+		}
+	} else {
+		fmt.Fprintln(r.out, title)
+		if subtitle != "" {
+			fmt.Fprintln(r.out, subtitle)
+		}
+	}
+	fmt.Fprintln(r.out)
+}
+
+func (r renderer) Rows(rows ...outputRow) {
+	width := rowKeyWidth(rows)
+	for _, row := range rows {
+		r.writeRow(row, width)
+	}
+}
+
+func (r renderer) Row(row outputRow) {
+	r.writeRow(row, len(row.key))
+}
+
+func (r renderer) Blank() {
+	fmt.Fprintln(r.out)
+}
+
+func (r renderer) writeRow(row outputRow, width int) {
+	lines := strings.Split(row.value, "\n")
+	if len(lines) > 1 {
+		r.writeSingleLine(outputRow{row.key, lines[0]}, width)
+		for _, line := range lines[1:] {
+			r.writeSingleLine(outputRow{"", line}, width)
+		}
+		return
+	}
+	r.writeSingleLine(row, width)
+}
+
+func (r renderer) writeSingleLine(row outputRow, width int) {
+	if row.key == "" {
+		fmt.Fprintf(r.out, "%*s  %s\n", width, "", row.value)
+		return
+	}
+	key := row.key
+	if r.styled {
+		key = "\033[2m" + key + "\033[0m"
+	}
+	if r.styled {
+		fmt.Fprintf(r.out, "%s%s  %s\n", key, strings.Repeat(" ", width-len(row.key)), row.value)
+		return
+	}
+	fmt.Fprintf(r.out, "%-*s  %s\n", width, row.key, row.value)
+}
+
+func rowKeyWidth(rows []outputRow) int {
+	width := 0
+	for _, row := range rows {
+		if len(row.key) > width {
+			width = len(row.key)
+		}
+	}
+	return width
+}
+
+func streamComposeOutput(input io.Reader, r renderer, wg *sync.WaitGroup) {
+	defer wg.Done()
+	scanner := bufio.NewScanner(input)
+	scanner.Buffer(make([]byte, 1024), 1024*1024)
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if line == "" || line == "Watch enabled" {
+			continue
+		}
+		r.Row(outputRow{"compose", line})
+	}
 }
 
 func resolveHome() (string, error) {
@@ -392,7 +551,7 @@ func resolveHome() (string, error) {
 	}
 }
 
-func shouldStyleHelp(w io.Writer) bool {
+func shouldStyleOutput(w io.Writer) bool {
 	if os.Getenv("NO_COLOR") != "" {
 		return false
 	}

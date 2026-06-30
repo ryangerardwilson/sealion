@@ -39,6 +39,9 @@ quiet Compose output and watch enabled. Edits under `view/web/src/`, `src/`,
 rebuild and replace the relevant container. Use `docker compose logs -f` for raw
 container logs.
 
+The CLI presents status as aligned rows with TTY-only muted styling. Captured or
+piped output remains plain text for tests and scripts.
+
 Generated apps keep browser UI in `view/web/src/`. Bun owns the frontend
 server and API proxy, Tailwind owns styling, and React owns page flow, forms,
 and dashboard rendering. The C backend owns `/api` routes, auth, sessions,

@@ -49,7 +49,8 @@ Initial checks:
   container, C backend container, Postgres-only database, infrastructure as
   code, local Compose first, and Postgres-backed queues;
 - install script, CLI, and default template files exist;
-- the Go CLI builds and its deterministic helpers pass unit tests;
+- the Go CLI builds and its deterministic helpers and output renderer pass unit
+  tests;
 - documentation site files exist;
 - custom Pages domain is present in `docs/site/CNAME`;
 - workflow files exist.
@@ -138,6 +139,8 @@ Future checks:
 - `sealion init` succeeds only in an empty directory;
 - `sealion run dev` prints a compact startup summary and suppresses noisy
   Compose build output by default;
+- CLI success, error, version, upgrade, and dev-stack output use the shared
+  aligned renderer instead of scattered raw prints;
 - generated files are deterministic;
 - invalid commands print actionable errors;
 - scaffolded apps pass the same CI checks as framework examples.

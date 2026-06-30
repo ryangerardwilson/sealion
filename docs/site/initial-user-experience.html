@@ -28,6 +28,7 @@ sealion run dev</code></pre>
         <p>If port 8080 is already in use, <code>sealion run dev</code> selects another local port. To choose one explicitly, run <code>SEALION_HTTP_PORT=18080 sealion run dev</code>.</p>
         <p>The frontend listens on port 8080 inside its container. Your browser should use the host URL printed by the CLI.</p>
         <p>When Docker Compose supports file watch, <code>sealion run dev</code> starts the stack with quiet Compose output and watch enabled. Edits under <code>view/web/src/</code>, <code>src/</code>, <code>model/</code>, <code>controller/</code>, view web package/config files, or to <code>Dockerfile</code> rebuild and replace the relevant container. Use <code>docker compose logs -f</code> for raw container logs.</p>
+        <p>The CLI presents status as aligned rows with TTY-only muted styling. Captured or piped output remains plain text for tests and scripts.</p>
         <p>Generated apps keep browser UI in <code>view/web/src/</code>. Bun owns the frontend server and API proxy, Tailwind owns styling, React owns page flow, forms, and dashboard rendering. The C backend owns <code>/api</code> routes, auth, sessions, validation, and Postgres access.</p>
       </section>
 
