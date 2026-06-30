@@ -1,9 +1,0 @@
-<s-l2.page-header :title="app_name" />
-<s-l1.muted-text text="A Sealion starter app with Postgres-backed auth." />
-
-<nav class="nav">
-  <s-l1.action-link href="/register" label="Create account" />
-  <s-l1.action-link href="/login" label="Log in" />
-</nav>
-
-<p class="muted">Demo login: <code>admin@sealion.local</code> / <code>password</code></p>

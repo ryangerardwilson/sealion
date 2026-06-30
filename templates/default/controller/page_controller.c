@@ -1,25 +1,38 @@
 #include "../src/app.h"
 
-void handle_home(int client, const Request *req) {
+#include <stdio.h>
+
+void handle_api_me(int client, const Request *req) {
   User user;
   if (current_user(req, &user)) {
-    redirect_to(client, "/dashboard", NULL);
+    char email[512];
+    char json[1024];
+    json_escape(email, sizeof(email), user.email);
+    snprintf(json, sizeof(json), "{\"authenticated\":true,\"user\":{\"email\":\"%s\"}}", email);
+    respond_json(client, "200 OK", NULL, json);
     return;
   }
-  ViewVar vars[] = {{"app_name", APP_NAME}};
-  respond_view(client, "200 OK", "home", "Welcome", vars, 1);
+  respond_json(client, "200 OK", NULL, "{\"authenticated\":false,\"user\":null}");
 }
 
-void handle_dashboard(int client, const Request *req) {
+void handle_api_dashboard(int client, const Request *req) {
   User user;
   if (!current_user(req, &user)) {
-    redirect_to(client, "/login", NULL);
+    respond_json(client, "401 Unauthorized", NULL, "{\"ok\":false,\"error\":\"Authentication required.\"}");
     return;
   }
-  ViewVar vars[] = {{"user_email", user.email}};
-  respond_view(client, "200 OK", "dashboard", "Dashboard", vars, 1);
+  char email[512];
+  char json[1024];
+  json_escape(email, sizeof(email), user.email);
+  snprintf(
+    json,
+    sizeof(json),
+    "{\"ok\":true,\"user\":{\"email\":\"%s\"},\"message\":\"This dashboard is backed by the C API and Postgres.\"}",
+    email
+  );
+  respond_json(client, "200 OK", NULL, json);
 }
 
 void handle_not_found(int client) {
-  respond_view(client, "404 Not Found", "not_found", "Not found", NULL, 0);
+  respond_json(client, "404 Not Found", NULL, "{\"ok\":false,\"error\":\"Route not found.\"}");
 }

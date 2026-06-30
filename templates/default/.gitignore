@@ -1,5 +1,6 @@
 .env
 build/
+frontend/dist/
+frontend/node_modules/
 *.o
 sealion-app
-

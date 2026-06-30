@@ -1,8 +1,0 @@
-<s-l2.layout :passover=[
-  title,
-  app_name
-]>
-  <s-l3.dashboard-page :passover=[
-    user_email
-  ] />
-</s-l2.layout>

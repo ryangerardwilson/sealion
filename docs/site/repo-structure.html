@@ -12,7 +12,7 @@
       <div class="shell">
         <p class="eyebrow"><a href="index.html">Sealion docs</a></p>
         <h1>Directory structure</h1>
-        <p class="lead">The repo separates framework source, generated MVC app code, components, tests, infrastructure, automation, and published documentation from the start.</p>
+        <p class="lead">The repo separates framework source, generated React frontend code, C backend code, tests, infrastructure, automation, and published documentation from the start.</p>
       </div>
     </header>
 
@@ -34,10 +34,9 @@
 |-- src/ui/
 |-- templates/default/
 |   |-- controller/
+|   |-- frontend/
 |   |-- model/
 |   |-- src/
-|   |-- ui_components/
-|   `-- view/
 |-- tests/fixtures/
 |-- tests/integration/
 |-- tests/regression/
@@ -58,12 +57,12 @@
           <li><strong>infra:</strong> Compose templates and infrastructure schemas.</li>
           <li><strong>scripts:</strong> repo-owned checks and maintenance commands.</li>
           <li><strong>src:</strong> framework implementation.</li>
-          <li><strong>src/ui:</strong> component rendering, utility parsing, token resolution, and CSS generation.</li>
+          <li><strong>src/ui:</strong> future framework UI helpers and optional server-rendered tooling.</li>
           <li><strong>templates/default:</strong> starter app used by <code>sealion new</code> and <code>sealion init</code>.</li>
+          <li><strong>templates/default/frontend:</strong> generated React/Vite frontend container and browser UI.</li>
           <li><strong>templates/default/model:</strong> generated Postgres-backed model code.</li>
           <li><strong>templates/default/controller:</strong> generated request-flow handlers.</li>
-          <li><strong>templates/default/view:</strong> thin <code>.skin</code> starter templates that compose <code>.scale</code> components and pass data into them.</li>
-          <li><strong>templates/default/ui_components:</strong> generated <code>.scale</code> components organized into <code>l1</code>, <code>l2</code>, and <code>l3</code>, with skins allowed to use L2/L3, L2 allowed to use L1, L3 allowed to use L1/L2, and L1 kept primitive.</li>
+          <li><strong>templates/default/src:</strong> generated C HTTP/API server.</li>
           <li><strong>tests:</strong> fixtures, unit, integration, and regression coverage.</li>
           <li><strong>install.sh:</strong> GitHub URL installer.</li>
         </ul>

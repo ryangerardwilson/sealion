@@ -1,15 +1,40 @@
 name: __PROJECT_SLUG__
 
 services:
-  app:
+  frontend:
+    build:
+      context: ./frontend
+    environment:
+      VITE_APP_NAME: "__PROJECT_NAME__"
+    ports:
+      - "${SEALION_HTTP_PORT:-8080}:8080"
+    depends_on:
+      backend:
+        condition: service_healthy
+    develop:
+      watch:
+        - action: rebuild
+          path: ./frontend/src
+        - action: rebuild
+          path: ./frontend/index.html
+        - action: rebuild
+          path: ./frontend/package.json
+        - action: rebuild
+          path: ./frontend/package-lock.json
+        - action: rebuild
+          path: ./frontend/vite.config.js
+        - action: rebuild
+          path: ./frontend/Dockerfile
+
+  backend:
     build:
       context: .
     environment:
       APP_PORT: "8080"
       PUBLIC_URL: "http://localhost:${SEALION_HTTP_PORT:-8080}"
       DATABASE_URL: postgres://sealion:sealion@db:5432/sealion
-    ports:
-      - "${SEALION_HTTP_PORT:-8080}:8080"
+    expose:
+      - "8080"
     depends_on:
       db:
         condition: service_healthy
@@ -21,10 +46,6 @@ services:
           path: ./model
         - action: rebuild
           path: ./controller
-        - action: rebuild
-          path: ./view
-        - action: rebuild
-          path: ./ui_components
         - action: rebuild
           path: ./Dockerfile
 

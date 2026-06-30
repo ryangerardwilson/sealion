@@ -12,7 +12,7 @@
       <div class="shell">
         <p class="eyebrow"><a href="index.html">Sealion docs</a></p>
         <h1>Install, create, run, log in.</h1>
-        <p class="lead">The first Sealion app should boot with one command and include a Postgres-backed auth, logout, and dashboard flow by default.</p>
+        <p class="lead">The first Sealion app should boot with one command and include a React frontend, C API backend, Postgres-backed auth, logout, and dashboard flow by default.</p>
       </div>
     </header>
 
@@ -25,21 +25,20 @@ cd demo
 sealion run dev</code></pre>
         <p>Open the app URL printed by <code>sealion run dev</code>.</p>
         <p>If port 8080 is already in use, <code>sealion run dev</code> selects another local port. To choose one explicitly, run <code>SEALION_HTTP_PORT=18080 sealion run dev</code>.</p>
-        <p>The app listens on port 8080 inside the container. Your browser should use the host URL printed by the CLI and app logs.</p>
-        <p>When Docker Compose supports file watch, <code>sealion run dev</code> starts the stack with Compose watch enabled. Edits under <code>src/</code>, <code>model/</code>, <code>controller/</code>, <code>view/</code>, <code>ui_components/</code>, or to <code>Dockerfile</code> rebuild and replace the app container.</p>
-        <p>Generated apps keep page flow in <code>view/*.skin</code>, but UI implementation belongs in <code>.scale</code> components under <code>ui_components/l1</code>, <code>ui_components/l2</code>, and <code>ui_components/l3</code>. Component composition is level-checked: skins may use L2/L3, L2 may use L1, L3 may use L1/L2, and L1 stays primitive. The starter layout is <code>layout.scale</code>, used from each page skin with Blade-like Scale tags such as <code>&lt;s-l2.layout :passover=[title,app_name]&gt;...&lt;/s-l2.layout&gt;</code>.</p>
+        <p>The frontend listens on port 8080 inside its container. Your browser should use the host URL printed by the CLI.</p>
+        <p>When Docker Compose supports file watch, <code>sealion run dev</code> starts the stack with Compose watch enabled. Edits under <code>frontend/src/</code>, <code>src/</code>, <code>model/</code>, <code>controller/</code>, frontend package/config files, or to <code>Dockerfile</code> rebuild and replace the relevant container.</p>
+        <p>Generated apps keep browser UI in <code>frontend/src/</code>. React owns page flow, forms, and dashboard rendering. The C backend owns <code>/api</code> routes, auth, sessions, validation, and Postgres access.</p>
       </section>
 
       <section>
         <h2>Generated App</h2>
         <ul>
-          <li>C app container.</li>
+          <li>React frontend container.</li>
+          <li>C backend/API container.</li>
           <li>Postgres service container.</li>
           <li>Checked-in Docker Compose infrastructure.</li>
           <li>Register, login, logout, and dashboard routes.</li>
-          <li>MVC directories for model, view, and controller code.</li>
-          <li><code>.scale</code> components under <code>ui_components/</code>.</li>
-          <li>A <code>layout.scale</code> component used from each <code>.skin</code> page.</li>
+          <li>Model and controller directories for backend code.</li>
           <li>Postgres-backed users and sessions.</li>
           <li>Seeded demo account: <code>admin@sealion.local</code> / <code>password</code>.</li>
         </ul>
@@ -49,7 +48,7 @@ sealion run dev</code></pre>
         <h2>Commands</h2>
         <ul>
           <li><code>sealion help</code> prints the command reference.</li>
-          <li><code>sealion format</code> formats <code>.skin</code> and <code>.scale</code> files.</li>
+          <li><code>sealion format</code> formats optional <code>.skin</code> and <code>.scale</code> files.</li>
           <li><code>sealion upgrade</code> upgrades the installed CLI when a newer GitHub commit is available.</li>
           <li><code>sealion new &lt;project-name&gt;</code> creates a new project directory.</li>
           <li><code>sealion init</code> initializes the current empty directory.</li>

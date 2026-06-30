@@ -1,8 +1,0 @@
-<s-l2.page-header title="Dashboard" />
-
-<p class="success">You are logged in as <strong>{{ user_email }}</strong>.</p>
-<p class="muted">This page is protected by a Postgres-backed Sealion session.</p>
-
-<form method="post" action="/logout">
-  <s-l1.button type="submit" label="Log out" />
-</form>

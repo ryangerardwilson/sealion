@@ -46,6 +46,15 @@ generated apps, infrastructure, tests, and documentation have clear ownership.
 |       |-- controller/
 |       |   |-- auth_controller.c
 |       |   `-- page_controller.c
+|       |-- frontend/
+|       |   |-- Dockerfile
+|       |   |-- index.html
+|       |   |-- package.json
+|       |   |-- package-lock.json
+|       |   |-- vite.config.js
+|       |   `-- src/
+|       |       |-- main.jsx
+|       |       `-- styles.css
 |       |-- migrations/
 |       |   `-- 001_auth.sql
 |       |-- model/
@@ -55,29 +64,6 @@ generated apps, infrastructure, tests, and documentation have clear ownership.
 |       |-- src/
 |       |   |-- app.h
 |       |   `-- main.c
-|       |-- ui_components/
-|       |   |-- l1/
-|       |   |   |-- .gitkeep
-|       |   |   |-- action_link.scale
-|       |   |   |-- button.scale
-|       |   |   |-- form_label.scale
-|       |   |   |-- heading.scale
-|       |   |   |-- muted_text.scale
-|       |   |   `-- text_input.scale
-|       |   |-- l2/
-|       |   |   |-- auth_form.scale
-|       |   |   |-- layout.scale
-|       |   |   `-- page_header.scale
-|       |   `-- l3/
-|       |       |-- dashboard_page.scale
-|       |       |-- home_page.scale
-|       |       `-- not_found_page.scale
-|       `-- view/
-|           |-- dashboard.skin
-|           |-- home.skin
-|           |-- login.skin
-|           |-- not_found.skin
-|           `-- register.skin
 |-- tests/
 |   |-- fixtures/
 |   |-- integration/
@@ -104,13 +90,11 @@ generated apps, infrastructure, tests, and documentation have clear ownership.
   generation.
 - `templates/default/`: generated starter app used by `sealion new` and
   `sealion init`.
+- `templates/default/frontend/`: generated React/Vite frontend container and
+  browser UI.
 - `templates/default/model/`: generated Postgres-backed model code.
 - `templates/default/controller/`: generated request-flow handlers.
-- `templates/default/view/`: thin `.skin` starter templates that compose
-  `.scale` components and pass data into them.
-- `templates/default/ui_components/`: generated `.scale` components organized
-  into `l1`, `l2`, and `l3`; skins may use L2/L3, L2 may use L1, L3 may use
-  L1/L2, and L1 stays primitive.
+- `templates/default/src/`: generated C HTTP/API server.
 - `tests/fixtures/`: shared test fixtures.
 - `tests/integration/`: tests that use Postgres or containers.
 - `tests/regression/`: tests created after a bug or broken contract.

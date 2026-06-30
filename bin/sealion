@@ -195,7 +195,14 @@ command_format() {
   command -v python3 >/dev/null 2>&1 || fail "python3 is required for sealion format"
   if [ "$#" -eq 0 ]; then
     [ -f "$PWD/sealion.toml" ] || fail "run this inside a Sealion project or pass paths to sealion format"
-    set -- view ui_components
+    local paths=()
+    [ -e view ] && paths+=("view")
+    [ -e ui_components ] && paths+=("ui_components")
+    if [ "${#paths[@]}" -eq 0 ]; then
+      printf 'formatted 0 file(s)\n'
+      return
+    fi
+    set -- "${paths[@]}"
   fi
 
   python3 - "$@" <<'PY'
@@ -364,10 +371,11 @@ command_run_dev() {
   if [ -z "$requested_port" ] && [ "$port" != "8080" ]; then
     printf 'port 8080 is busy; using %s\n' "$port"
   fi
-  printf 'app: http://localhost:%s\n' "$port"
+  printf 'frontend: http://localhost:%s\n' "$port"
+  printf 'backend API: http://localhost:%s/api\n' "$port"
   printf 'demo login: admin@sealion.local / password\n'
   if compose_supports_watch "$compose"; then
-    printf 'watch: enabled for app source rebuilds\n'
+    printf 'watch: enabled for frontend and backend source rebuilds\n'
     # shellcheck disable=SC2086
     $compose up --build --watch
   else

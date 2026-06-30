@@ -1,151 +1,83 @@
-# Component Style System
+# Frontend Contract
 
-Sealion should give developers Tailwind-like styling ergonomics without making
-Tailwind, Node, npm, or a frontend build chain mandatory.
+Sealion's default app uses a React frontend, C API backend, and Postgres
+database. The frontend is a mandatory container in the default local topology,
+not a host-installed Node requirement.
 
 ## Product Decision
 
-Sealion owns a small utility-style component styling system.
+The default Sealion UI should be React, not a custom Blade-like C template
+system.
 
-The system is Tailwind-inspired, not Tailwind-compatible by default. Developers
-can describe component styles with compact utility strings, but Sealion parses,
-validates, and compiles those strings through framework-owned C tooling.
+This keeps frontend authoring inside a mature ecosystem while preserving the
+core Sealion bet: C owns backend logic, auth, sessions, database access, and
+the framework runtime contract.
 
-## Goals
+## Runtime Model
 
-- Let C web apps author common layout, spacing, typography, color, and state
-  styles without hand-writing CSS for every component.
-- Keep styling deterministic and inspectable.
-- Generate stable CSS artifacts from checked-in component source.
-- Make style errors fail during build or CI, not at runtime in the browser.
-- Keep Tailwind optional for apps that choose it, not required by the
-  framework.
+```text
+browser -> frontend container -> /api proxy -> backend C container -> Postgres
+```
 
-## Non-Goals
+- `frontend` owns React, Vite, browser routes, forms, dashboard UI, and CSS.
+- `backend` owns C API routes, auth, session cookies, validation, and JSON.
+- `db` owns durable Postgres state.
 
-- Full Tailwind compatibility.
-- Requiring Node, npm, PostCSS, or the Tailwind CLI.
-- Runtime CSS-in-JS.
-- Dynamic browser-side class generation.
-- A general CSS preprocessor.
+The frontend is the public entrypoint. It proxies `/api` and `/health` to the
+backend so browser requests stay same-origin.
 
 ## Authoring Model
 
-Starter app components live in `.scale` files:
+Generated apps start with:
 
 ```text
-ui_components/
-|-- l1/
-|-- l2/
-`-- l3/
+frontend/
+|-- Dockerfile
+|-- index.html
+|-- package.json
+|-- package-lock.json
+|-- vite.config.js
+`-- src/
+    |-- main.jsx
+    `-- styles.css
 ```
 
-`.skin` views import `.scale` components and pass data through variables:
+The default UI is deliberately small: register, login, logout, and dashboard.
+React components call same-origin `/api` endpoints with `credentials: "include"`
+so the backend can own HttpOnly cookies.
 
-```html
-<s-l2.layout :passover=[
-  title,
-  app_name
-]>
-  <s-l3.dashboard-page :passover=[
-    user_email
-  ] />
-</s-l2.layout>
-```
+## Styling
 
-Use `:passover=[...]` when the component prop names match the variable names
-already in scope. Use explicit props only for aliases or literals, such as
-`<s-l3.example :title="page_title" label="Save" />`.
-`sealion format` expands passover arrays into this multiline style.
+Generated apps use plain checked-in CSS first. Tailwind remains optional for
+projects that choose it, but it is not required by the framework starter.
 
-Components receive only props passed by their caller. Component composition is
-level-checked:
+Future component conventions can still use L1/L2/L3 language:
 
-- `.skin` files may use L2 and L3 components only;
-- L1 primitives do not use other components;
-- L2 pattern components may use L1 primitives only;
-- L3 product/domain components may use L1 primitives and L2 patterns.
+- L1: primitive controls and text treatments;
+- L2: reusable patterns such as form sections or page headers;
+- L3: app-specific pages and product/domain sections.
 
-Dotted component names map to `.scale` paths, so `s-l3.dashboard-page` resolves
-to `ui_components/l3/dashboard_page.scale`.
+The default React starter should keep those boundaries in component structure,
+without requiring `.skin` or `.scale` files.
 
-Components can attach a style specification to rendered markup:
+## Optional Server Rendering
 
-```c
-sl_component("button")
-  .style("inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium bg-primary text-on-primary hover:bg-primary-strong disabled:opacity-50")
-  .render(ctx);
-```
-
-The utility vocabulary should stay intentionally small at first:
-
-- display and layout;
-- flex and grid primitives;
-- spacing;
-- border radius and border width;
-- typography;
-- color tokens;
-- hover, focus, disabled, and active states;
-- a small responsive variant set.
-
-## Compilation Model
-
-The Sealion build step scans component style specs, validates each utility, and
-emits generated CSS.
-
-```text
-component source -> utility parser -> token resolver -> generated CSS artifact
-```
-
-The generated CSS is a build artifact. The component source and theme tokens are
-the source of truth.
-
-## Tokens
-
-Raw arbitrary values should be rare. The default path should use named tokens:
-
-- colors;
-- spacing;
-- font sizes;
-- radius;
-- shadows;
-- breakpoints;
-- z-index layers.
-
-Tokens belong in checked-in app configuration and should be visible to CI.
-
-## Escape Hatch
-
-Plain app CSS remains allowed for cases the utility system does not cover. It is
-an escape hatch, not the primary authoring path.
-
-Apps may also opt into Tailwind themselves, but Sealion must not require
-Tailwind for generated apps, framework examples, CI, or documentation.
+The earlier `.skin` and `.scale` template work remains a possible future
+server-rendered mode. It is no longer the default path. `sealion format` remains
+available for projects that contain `.skin` and `.scale` files.
 
 ## Regression Tests
 
-The component style system needs dedicated regression coverage:
+The frontend contract needs dedicated regression coverage:
 
-- view files stay import-only and do not own CSS;
-- components use `.scale`, not `.html`;
-- component calls obey the L1/L2/L3 hierarchy;
-- `sealion format` is idempotent for `.skin` and `.scale` files;
-- L1/L2/L3 component directories exist in generated apps;
-- utility parser accepts valid specs and rejects unknown utilities;
-- generated CSS is deterministic;
-- token references fail when missing;
-- conflicting utilities produce predictable output or actionable errors;
-- variants generate scoped selectors;
-- component examples compile without Tailwind installed;
-- plain CSS escape hatch does not bypass unsafe HTML or asset rules.
-
-## First Milestone
-
-The first component-style milestone is a button component that:
-
-1. renders server-side HTML,
-2. accepts a utility-style spec,
-3. compiles deterministic CSS,
-4. uses theme tokens,
-5. fails CI on an unknown utility,
-6. does not require Tailwind or Node.
+- generated apps include a React frontend container;
+- generated apps include a C backend/API container;
+- generated apps include a Postgres database container;
+- frontend proxies `/api` and `/health` to the backend;
+- auth uses same-origin cookies without CORS setup;
+- login returns JSON and sets a session cookie;
+- `/api/me` reports authenticated and anonymous states correctly;
+- `/dashboard` is served by the React app shell;
+- frontend and backend watch paths are present in Compose;
+- generated frontend builds from `npm ci` using a lockfile;
+- `.skin`/`.scale` files are not required by the default starter.

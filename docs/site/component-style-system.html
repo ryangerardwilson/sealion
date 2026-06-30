@@ -3,61 +3,53 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Component Style System | Sealion</title>
-    <meta name="description" content="Sealion's Tailwind-like component styling system without a Tailwind dependency.">
+    <title>Frontend Contract | Sealion</title>
+    <meta name="description" content="Sealion's React frontend, C API backend, and Postgres database contract.">
     <link rel="stylesheet" href="assets/styles.css">
   </head>
   <body>
     <header class="hero">
       <div class="shell">
         <p class="eyebrow"><a href="index.html">Sealion docs</a></p>
-        <h1>Tailwind-like ergonomics without the Tailwind dependency.</h1>
-        <p class="lead">Sealion components should use a compact utility-style grammar that the framework validates and compiles into deterministic CSS.</p>
+        <h1>React frontend, C API backend, Postgres database.</h1>
+        <p class="lead">The default Sealion UI uses React in a container while the framework keeps auth, sessions, and data access in C.</p>
       </div>
     </header>
 
     <main class="shell">
       <section>
-        <h2>Product Decision</h2>
-        <p>Sealion owns a small component styling system. Starter components live in <code>.scale</code> files under <code>ui_components/l1</code>, <code>ui_components/l2</code>, and <code>ui_components/l3</code>. Tailwind remains optional for apps that choose it.</p>
+        <h2>Runtime Model</h2>
+        <pre><code>browser -> frontend container -> /api proxy -> backend C container -> Postgres</code></pre>
+        <p>The frontend is the public entrypoint. It proxies <code>/api</code> and <code>/health</code> to the backend so browser requests stay same-origin.</p>
       </section>
 
       <section>
-        <h2>Authoring Model</h2>
-        <pre><code>view/dashboard.skin
-&lt;s-l2.layout :passover=[
-  title,
-  app_name
-]&gt;
-  &lt;s-l3.dashboard-page :passover=[
-    user_email
-  ] /&gt;
-&lt;/s-l2.layout&gt;
-
-ui_components/l3/dashboard_page.scale
-&lt;s-l2.page-header title="Dashboard" /&gt;</code></pre>
-        <p><code>.skin</code> views import <code>.scale</code> components and pass same-named variables with <code>:passover=[...]</code>. <code>sealion format</code> expands passover arrays into one variable per line. Explicit props remain available for aliases or literals, such as <code>&lt;s-l3.example :title="page_title" label="Save" /&gt;</code>. Component composition is level-checked: skins may use L2/L3, L2 may use L1, L3 may use L1/L2, and L1 stays primitive. Dotted component names map to <code>.scale</code> paths.</p>
+        <h2>Generated Frontend</h2>
+        <pre><code>frontend/
+|-- Dockerfile
+|-- index.html
+|-- package.json
+|-- package-lock.json
+|-- vite.config.js
+`-- src/
+    |-- main.jsx
+    `-- styles.css</code></pre>
+        <p>React owns page flow, forms, and dashboard rendering. The C backend owns JSON responses, HttpOnly cookies, sessions, validation, and Postgres access.</p>
       </section>
 
       <section>
-        <h2>Compilation Model</h2>
-        <pre><code>component source -> utility parser -> token resolver -> generated CSS artifact</code></pre>
-        <p>The generated CSS is a build artifact. Component source and theme tokens are the source of truth.</p>
+        <h2>Styling</h2>
+        <p>The starter uses plain checked-in CSS. Tailwind remains optional for apps that choose it, but it is not required by the framework starter.</p>
       </section>
 
       <section>
         <h2>Regression Requirements</h2>
         <ul>
-          <li>Valid utilities compile and unknown utilities fail CI.</li>
-          <li>View files stay import-only and do not own CSS.</li>
-          <li>View and component calls pass required props explicitly.</li>
-          <li>Components use <code>.scale</code>, not <code>.html</code>.</li>
-          <li>Component calls obey the L1/L2/L3 hierarchy.</li>
-          <li><code>sealion format</code> is idempotent for <code>.skin</code> and <code>.scale</code> files.</li>
-          <li>Generated CSS is deterministic.</li>
-          <li>Missing tokens produce actionable errors.</li>
-          <li>Components compile without Tailwind, Node, npm, or PostCSS.</li>
-          <li>Plain CSS remains an escape hatch, not the primary authoring path.</li>
+          <li>Generated apps include frontend, backend, and database containers.</li>
+          <li>The frontend proxies <code>/api</code> and <code>/health</code> to the backend.</li>
+          <li>Auth uses same-origin cookies without CORS setup.</li>
+          <li>Frontend builds from <code>npm ci</code> using a lockfile.</li>
+          <li><code>.skin</code> and <code>.scale</code> files are optional, not required by the default starter.</li>
         </ul>
       </section>
     </main>

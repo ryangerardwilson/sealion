@@ -59,11 +59,11 @@ docker compose config > "$tmp_dir/compose.config"
 grep -q "develop:" "$tmp_dir/compose.config"
 grep -q "watch:" "$tmp_dir/compose.config"
 grep -q "action: rebuild" "$tmp_dir/compose.config"
+grep -q "/frontend/src" "$tmp_dir/compose.config"
+grep -q "/frontend/package.json" "$tmp_dir/compose.config"
 grep -q "/src" "$tmp_dir/compose.config"
 grep -q "/model" "$tmp_dir/compose.config"
 grep -q "/controller" "$tmp_dir/compose.config"
-grep -q "/view" "$tmp_dir/compose.config"
-grep -q "/ui_components" "$tmp_dir/compose.config"
 grep -q "/Dockerfile" "$tmp_dir/compose.config"
 SEALION_HTTP_PORT="$port" docker compose up -d --build
 
@@ -76,12 +76,19 @@ done
 
 curl -fsS "http://localhost:$port/health" >/dev/null
 curl -fsS "http://localhost:$port/" > "$tmp_dir/home.html"
-grep -q "<h1>demo</h1>" "$tmp_dir/home.html"
-! grep -q "{{" "$tmp_dir/home.html"
-! grep -q "{!!" "$tmp_dir/home.html"
-docker compose logs app > "$tmp_dir/app.log"
-grep -q "listening inside container on :8080" "$tmp_dir/app.log"
-grep -q "open http://localhost:$port" "$tmp_dir/app.log"
+grep -q '<div id="root"></div>' "$tmp_dir/home.html"
+grep -q "/src/main.jsx" "$tmp_dir/home.html"
+curl -fsS "http://localhost:$port/api/me" > "$tmp_dir/me-anon.json"
+grep -q '"authenticated":false' "$tmp_dir/me-anon.json"
+docker compose logs backend > "$tmp_dir/backend.log"
+grep -q "API listening inside backend container on :8080" "$tmp_dir/backend.log"
+grep -q "frontend proxies API calls from http://localhost:$port/api" "$tmp_dir/backend.log"
+docker compose logs frontend > "$tmp_dir/frontend.log"
+grep -q "Local:" "$tmp_dir/frontend.log"
+if ! docker compose run --rm --no-deps frontend npm run build > "$tmp_dir/frontend-build.log" 2>&1; then
+  cat "$tmp_dir/frontend-build.log" >&2
+  exit 1
+fi
 
 python3 - "$port" <<'PY' &
 import socket
@@ -99,19 +106,19 @@ curl \
   -sS \
   --max-time 5 \
   -D "$tmp_dir/login.headers" \
-  -o "$tmp_dir/login.body" \
+  -o "$tmp_dir/login.json" \
   -c "$tmp_dir/cookies" \
   -d "email=admin%40sealion.local&password=password" \
-  "http://localhost:$port/login"
+  "http://localhost:$port/api/login"
 wait "$idle_pid" || true
 
-grep -q "302 Found" "$tmp_dir/login.headers"
-grep -q "Location: /dashboard" "$tmp_dir/login.headers"
-grep -q "Cache-Control: no-store" "$tmp_dir/login.headers"
-grep -q "Set-Cookie: sealion_session=" "$tmp_dir/login.headers"
+grep -q "200 OK" "$tmp_dir/login.headers"
+grep -qi "content-type: application/json" "$tmp_dir/login.headers"
+grep -qi "cache-control: no-store" "$tmp_dir/login.headers"
+grep -qi "set-cookie: sealion_session=" "$tmp_dir/login.headers"
 grep -q "sealion_session" "$tmp_dir/cookies"
-grep -q "window.location.replace('/dashboard')" "$tmp_dir/login.body"
-grep -q 'href="/dashboard"' "$tmp_dir/login.body"
+grep -q '"ok":true' "$tmp_dir/login.json"
+grep -q 'admin@sealion.local' "$tmp_dir/login.json"
 
 session_token="$(awk '$6 == "sealion_session" {print $7}' "$tmp_dir/cookies" | tail -n 1)"
 long_cookie="$(
@@ -122,36 +129,20 @@ PY
 curl \
   -fsS \
   -H "Cookie: unrelated=${long_cookie}; sealion_session=${session_token}" \
-  "http://localhost:$port/dashboard" > "$tmp_dir/dashboard-long-cookie.html"
-grep -q "<h1>Dashboard</h1>" "$tmp_dir/dashboard-long-cookie.html"
+  "http://localhost:$port/api/dashboard" > "$tmp_dir/dashboard-long-cookie.json"
+grep -q '"ok":true' "$tmp_dir/dashboard-long-cookie.json"
+grep -q 'admin@sealion.local' "$tmp_dir/dashboard-long-cookie.json"
 
-curl -fsS -b "$tmp_dir/cookies" "http://localhost:$port/dashboard" > "$tmp_dir/dashboard.html"
-grep -q "<h1>Dashboard</h1>" "$tmp_dir/dashboard.html"
-grep -q "You are logged in as" "$tmp_dir/dashboard.html"
-! grep -q "{{" "$tmp_dir/dashboard.html"
-! grep -q "{!!" "$tmp_dir/dashboard.html"
+curl -fsS -b "$tmp_dir/cookies" "http://localhost:$port/api/me" > "$tmp_dir/me-auth.json"
+grep -q '"authenticated":true' "$tmp_dir/me-auth.json"
+grep -q 'admin@sealion.local' "$tmp_dir/me-auth.json"
 
-printf '<s-l1.heading text="Bad skin use" />\n' > view/home.skin
-printf '<s-l2.page-header title="Bad l2 use" />\n' > ui_components/l2/auth_form.scale
-SEALION_HTTP_PORT="$port" docker compose up -d --build app
+curl -fsS -b "$tmp_dir/cookies" "http://localhost:$port/dashboard" > "$tmp_dir/dashboard-shell.html"
+grep -q '<div id="root"></div>' "$tmp_dir/dashboard-shell.html"
 
-for _ in $(seq 1 60); do
-  if curl -fsS "http://localhost:$port/health" >/dev/null 2>&1; then
-    break
-  fi
-  sleep 1
-done
-
-curl -sS -D "$tmp_dir/invalid-home.headers" -o "$tmp_dir/invalid-home.body" "http://localhost:$port/"
-grep -q "500 Internal Server Error" "$tmp_dir/invalid-home.headers"
-grep -q "Could not render the requested view" "$tmp_dir/invalid-home.body"
-
-curl -sS -D "$tmp_dir/invalid-login.headers" -o "$tmp_dir/invalid-login.body" "http://localhost:$port/login"
-grep -q "500 Internal Server Error" "$tmp_dir/invalid-login.headers"
-grep -q "Could not render the requested view" "$tmp_dir/invalid-login.body"
-
-docker compose logs app > "$tmp_dir/invalid-app.log"
-grep -q "skin templates cannot use s-l1/heading components" "$tmp_dir/invalid-app.log"
-grep -q "l2 templates cannot use s-l2/page_header components" "$tmp_dir/invalid-app.log"
+curl -fsS -b "$tmp_dir/cookies" -X POST "http://localhost:$port/api/logout" > "$tmp_dir/logout.json"
+grep -q '"ok":true' "$tmp_dir/logout.json"
+curl -fsS "http://localhost:$port/api/me" > "$tmp_dir/me-after-logout.json"
+grep -q '"authenticated":false' "$tmp_dir/me-after-logout.json"
 
 printf 'starter docker flow ok\n'

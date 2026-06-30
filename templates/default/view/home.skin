@@ -1,8 +1,0 @@
-<s-l2.layout :passover=[
-  title,
-  app_name
-]>
-  <s-l3.home-page :passover=[
-    app_name
-  ] />
-</s-l2.layout>

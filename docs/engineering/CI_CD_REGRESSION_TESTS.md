@@ -12,7 +12,7 @@ Runs on every pull request:
 - repository contract checks;
 - shell syntax checks for repo-owned scripts;
 - documentation site contract checks;
-- generated Docker stack smoke test with Postgres-backed login redirect;
+- generated Docker stack smoke test with Postgres-backed JSON login;
 - future C format, compile, unit, sanitizer, and integration checks.
 
 ### Main Branch Gate
@@ -44,8 +44,9 @@ Purpose: make the repo shape itself hard to accidentally break.
 Initial checks:
 
 - required directories exist;
-- README keeps the core product contracts: app container, Postgres-only,
-  infrastructure as code, local Compose first, and Postgres-backed queues;
+- README keeps the core product contracts: React frontend container, C backend
+  container, Postgres-only database, infrastructure as code, local Compose
+  first, and Postgres-backed queues;
 - install script, CLI, and default template files exist;
 - documentation site files exist;
 - custom Pages domain is present in `docs/site/CNAME`;
@@ -93,7 +94,7 @@ Purpose: enforce the mandatory database contract.
 
 Future checks:
 
-- app connects only after Postgres readiness;
+- backend connects only after Postgres readiness;
 - connection pool opens and closes cleanly;
 - migrations run up and down;
 - query builder always parameterizes inputs;
@@ -107,21 +108,21 @@ Purpose: keep local development close to production failure shapes.
 Future checks:
 
 - generated Compose file validates;
-- app container builds from a clean checkout;
-- app and Postgres run as separate services;
+- frontend and backend containers build from a clean checkout;
+- frontend, backend, and Postgres run as separate services;
 - health checks converge;
-- generated app logs the external browser URL selected for the host port;
-- demo login redirects to the protected dashboard with a persisted session;
-- generated Compose config declares file-watch rebuilds for source, model,
-  controller, view, component, and Dockerfile changes;
-- generated apps include MVC directories and import-only `view/*.skin`
-  templates instead of embedding page markup in C string literals;
-- generated apps include `.scale` components under `ui_components/l1`,
-  `ui_components/l2`, and `ui_components/l3`;
-- generated `.skin` files compose scale components, including `layout.scale`;
-- generated `.scale` files obey the L1/L2/L3 component hierarchy;
-- invalid component hierarchy edges return template errors;
-- `sealion format` rewrites compact passover arrays and is idempotent;
+- generated backend logs the external frontend URL used for API proxying;
+- demo login through `/api/login` sets a cookie and returns JSON;
+- generated Compose config declares file-watch rebuilds for frontend source,
+  frontend package/config files, backend source, model, controller, and
+  Dockerfile changes;
+- generated apps include a React frontend container, C backend/API container,
+  and Postgres database container;
+- frontend proxies `/api` and `/health` to the backend;
+- `/api/me` reports anonymous and authenticated state correctly;
+- `/dashboard` is served by the React app shell;
+- `sealion format` rewrites compact passover arrays and is idempotent when
+  optional `.skin` or `.scale` files exist;
 - restart behavior preserves Postgres data;
 - environment schema rejects missing required values.
 
@@ -167,20 +168,17 @@ Future checks:
 - links resolve inside the docs site;
 - release docs are versioned.
 
-### Component Style Regression
+### Optional Server-Rendered UI Regression
 
-Purpose: keep Tailwind-like ergonomics from turning into a Tailwind dependency
-or a loose string convention.
+Purpose: preserve the earlier `.skin` and `.scale` work if Sealion later adds
+an optional server-rendered UI mode.
 
 Future checks:
 
-- component style specs parse without Tailwind, Node, npm, or PostCSS;
-- unknown utilities fail with actionable errors;
-- generated CSS is deterministic;
-- missing tokens fail during build;
-- variants generate scoped selectors;
-- component examples compile with the framework-owned style generator;
-- plain CSS escape hatches remain app-owned and explicit.
+- `.skin` and `.scale` files format idempotently;
+- component calls obey their documented hierarchy;
+- unknown template directives fail with actionable errors;
+- server-rendered examples compile without becoming the default starter path.
 
 ## Current Implemented Checks
 
