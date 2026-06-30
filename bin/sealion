@@ -27,6 +27,8 @@ global actions:
     show this help
   sealion version
     print the installed version
+  sealion upgrade
+    upgrade the installed CLI from GitHub when a newer commit is available
 
 features:
   install the CLI from GitHub
@@ -144,6 +146,39 @@ compose_command() {
   fail "Docker Compose is required for sealion run dev"
 }
 
+command_upgrade() {
+  local current_head remote_head new_head install_script tmp_script
+
+  if [ -d "$SEALION_HOME/.git" ]; then
+    command -v git >/dev/null 2>&1 || fail "git is required to upgrade this installation"
+
+    if [ -n "$(git -C "$SEALION_HOME" status --porcelain)" ]; then
+      fail "cannot upgrade because $SEALION_HOME has local changes"
+    fi
+
+    current_head="$(git -C "$SEALION_HOME" rev-parse --short HEAD)"
+    git -C "$SEALION_HOME" fetch --quiet origin main
+    remote_head="$(git -C "$SEALION_HOME" rev-parse --short origin/main)"
+
+    if [ "$current_head" = "$remote_head" ]; then
+      printf 'sealion is already up to date (%s)\n' "$current_head"
+      return
+    fi
+
+    git -C "$SEALION_HOME" pull --ff-only --quiet origin main
+    new_head="$(git -C "$SEALION_HOME" rev-parse --short HEAD)"
+    printf 'upgraded sealion %s -> %s\n' "$current_head" "$new_head"
+    return
+  fi
+
+  install_script="$SEALION_HOME/install.sh"
+  [ -f "$install_script" ] || fail "cannot find install.sh for this Sealion installation"
+  tmp_script="$(mktemp)"
+  cp "$install_script" "$tmp_script"
+  SEALION_HOME="$SEALION_HOME" bash "$tmp_script"
+  rm -f "$tmp_script"
+}
+
 port_is_available() {
   local port="$1"
   if command -v python3 >/dev/null 2>&1; then
@@ -227,6 +262,11 @@ case "${1:-help}" in
     ;;
   version)
     printf 'sealion %s\n' "$SEALION_VERSION"
+    ;;
+  upgrade)
+    shift
+    [ "$#" -eq 0 ] || fail "usage: sealion upgrade"
+    command_upgrade
     ;;
   new)
     shift

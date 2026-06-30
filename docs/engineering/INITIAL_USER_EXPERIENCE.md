@@ -37,6 +37,14 @@ The generated app includes:
 
 ## Commands
 
+### `sealion help`
+
+Prints the command reference.
+
+### `sealion upgrade`
+
+Upgrades the installed CLI when a newer GitHub commit is available.
+
 ### `sealion new <project-name>`
 
 Creates a new project directory from the default starter template. It fails if

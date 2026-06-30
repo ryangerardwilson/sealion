@@ -128,6 +128,9 @@ and dashboard routes already wired. It prefers `http://localhost:8080`, but
 automatically selects another local port when 8080 is already in use. Set
 `SEALION_HTTP_PORT=<port>` to choose the host port explicitly.
 
+`sealion help` prints the command reference. `sealion upgrade` upgrades the
+installed CLI when a newer GitHub commit is available.
+
 ## Roadmap
 
 ### Phase 0: Project Contract

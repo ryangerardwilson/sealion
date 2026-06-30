@@ -7,6 +7,11 @@ trap 'rm -rf "$tmp_dir"' EXIT
 
 export SEALION_HOME="$repo_root"
 
+"$repo_root/bin/sealion" help > "$tmp_dir/help.out"
+grep -q "sealion help" "$tmp_dir/help.out"
+grep -q "sealion upgrade" "$tmp_dir/help.out"
+grep -q "sealion run dev" "$tmp_dir/help.out"
+
 cd "$tmp_dir"
 "$repo_root/bin/sealion" new demo
 
@@ -93,5 +98,32 @@ PY
 
   kill "$listener_pid" >/dev/null 2>&1 || true
 fi
+
+remote_repo="$tmp_dir/sealion-origin.git"
+installed_repo="$tmp_dir/installed-sealion"
+upgrade_work="$tmp_dir/upgrade-work"
+
+git init --bare "$remote_repo" >/dev/null
+git init "$installed_repo" >/dev/null
+mkdir -p "$installed_repo/bin"
+cp "$repo_root/bin/sealion" "$installed_repo/bin/sealion"
+git -C "$installed_repo" add bin/sealion
+git -C "$installed_repo" -c user.name="Sealion Test" -c user.email="test@sealion.local" commit -m "Initial install" >/dev/null
+git -C "$installed_repo" branch -M main
+git -C "$installed_repo" remote add origin "$remote_repo"
+git -C "$installed_repo" push -u origin main >/dev/null
+git --git-dir="$remote_repo" symbolic-ref HEAD refs/heads/main
+
+SEALION_HOME="$installed_repo" "$repo_root/bin/sealion" upgrade > "$tmp_dir/upgrade-current.out"
+grep -q "already up to date" "$tmp_dir/upgrade-current.out"
+
+git clone --branch main "$remote_repo" "$upgrade_work" >/dev/null
+printf '# changed\n' >> "$upgrade_work/README.md"
+git -C "$upgrade_work" add README.md
+git -C "$upgrade_work" -c user.name="Sealion Test" -c user.email="test@sealion.local" commit -m "Remote update" >/dev/null
+git -C "$upgrade_work" push >/dev/null
+
+SEALION_HOME="$installed_repo" "$repo_root/bin/sealion" upgrade > "$tmp_dir/upgrade-new.out"
+grep -q "upgraded sealion" "$tmp_dir/upgrade-new.out"
 
 printf 'cli scaffold ok\n'
