@@ -35,8 +35,8 @@
 &lt;/s-l2.layout&gt;
 
 ui_components/l3/dashboard_page.scale
-&lt;h1&gt;Dashboard&lt;/h1&gt;</code></pre>
-        <p><code>.skin</code> views import <code>.scale</code> components and pass same-named variables with <code>:passover=[...]</code>. <code>sealion format</code> expands passover arrays into one variable per line. Explicit props remain available for aliases or literals, such as <code>&lt;s-l3.example :title="page_title" label="Save" /&gt;</code>. Scale files do not embed other scale files; all component organization, arrangement, and embedding belongs in <code>.skin</code>. Dotted component names map to <code>.scale</code> paths.</p>
+&lt;s-l2.page-header title="Dashboard" /&gt;</code></pre>
+        <p><code>.skin</code> views import <code>.scale</code> components and pass same-named variables with <code>:passover=[...]</code>. <code>sealion format</code> expands passover arrays into one variable per line. Explicit props remain available for aliases or literals, such as <code>&lt;s-l3.example :title="page_title" label="Save" /&gt;</code>. Component composition is level-checked: skins may use L2/L3, L2 may use L1, L3 may use L1/L2, and L1 stays primitive. Dotted component names map to <code>.scale</code> paths.</p>
       </section>
 
       <section>
@@ -52,7 +52,7 @@ ui_components/l3/dashboard_page.scale
           <li>View files stay import-only and do not own CSS.</li>
           <li>View and component calls pass required props explicitly.</li>
           <li>Components use <code>.scale</code>, not <code>.html</code>.</li>
-          <li>Scale files do not contain Scale component tags.</li>
+          <li>Component calls obey the L1/L2/L3 hierarchy.</li>
           <li><code>sealion format</code> is idempotent for <code>.skin</code> and <code>.scale</code> files.</li>
           <li>Generated CSS is deterministic.</li>
           <li>Missing tokens produce actionable errors.</li>

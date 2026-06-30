@@ -146,10 +146,12 @@ passover arrays into one variable per line. Skins can also wrap content with
 block components, such as `<s-l2.layout>...</s-l2.layout>`. Use explicit props
 only for aliases or literals, such as
 `<s-l3.example :title="page_title" label="Save" />`. Components receive only the
-props passed by the caller. Scale files do not embed other scale files;
-composition belongs in `.skin`. The tag `s-l3.dashboard-page` maps to
-`ui_components/l3/dashboard_page.scale`. The starter renderer supports escaped
-variables with `{{ name }}` and trusted raw slots with `{!! content !!}`.
+props passed by the caller. Skins may use only L2 and L3 components. L1
+primitives may be used only inside L2 and L3 components; L2 patterns may be used
+inside skins and L3 components; L3 product components may be used in skins. The
+tag `s-l3.dashboard-page` maps to `ui_components/l3/dashboard_page.scale`. The
+starter renderer supports escaped variables with `{{ name }}`, trusted raw slots
+with `{!! content !!}`, and level-checked component composition.
 
 ## Roadmap
 
@@ -188,9 +190,8 @@ variables with `{{ name }}` and trusted raw slots with `{!! content !!}`.
 - Keep interpreted `view/*.skin` templates as import-only flow files.
 - Keep component implementation in `ui_components/**/*.scale`, attached from
   `.skin` files through Scale component tags.
-- Keep `.scale` files leaf-only: scale files do not embed other scale files.
-- Maintain L1/L2/L3 component boundaries for primitives, patterns, and
-  product/domain components.
+- Maintain L1/L2/L3 component boundaries: skins use L2/L3, L2 uses L1, L3 uses
+  L1/L2, and L1 stays primitive.
 - Support escaped variables with `{{ name }}` and trusted raw slots with
   `{!! content !!}`.
 - Add `sealion format` for readable `.skin` and `.scale` passover tags.

@@ -37,8 +37,15 @@ required_files=(
   "templates/default/view/dashboard.skin"
   "templates/default/view/not_found.skin"
   "templates/default/ui_components/l1/.gitkeep"
+  "templates/default/ui_components/l1/action_link.scale"
+  "templates/default/ui_components/l1/button.scale"
+  "templates/default/ui_components/l1/form_label.scale"
+  "templates/default/ui_components/l1/heading.scale"
+  "templates/default/ui_components/l1/muted_text.scale"
+  "templates/default/ui_components/l1/text_input.scale"
   "templates/default/ui_components/l2/layout.scale"
   "templates/default/ui_components/l2/auth_form.scale"
+  "templates/default/ui_components/l2/page_header.scale"
   "templates/default/ui_components/l3/home_page.scale"
   "templates/default/ui_components/l3/dashboard_page.scale"
   "templates/default/ui_components/l3/not_found_page.scale"
@@ -140,6 +147,8 @@ grep -q "{{ user_email }}" templates/default/ui_components/l3/dashboard_page.sca
 grep -q "render_template_text" templates/default/src/main.c
 grep -q "respond_view" templates/default/src/main.c
 grep -q "view/%s.skin" templates/default/src/main.c
+grep -q "component_level_from_name" templates/default/src/main.c
+grep -q "component_allowed_in_context" templates/default/src/main.c
 grep -q "parse_passover_props" templates/default/src/main.c
 grep -q "find_component_close" templates/default/src/main.c
 ! grep -q "view/%s.html" templates/default/src/main.c
@@ -148,7 +157,14 @@ grep -q "ui_components/%s.scale" templates/default/src/main.c
 ! grep -q "ui_components/%s.scales" templates/default/src/main.c
 ! grep -q "<style>" templates/default/src/main.c
 ! grep -R "<style>" templates/default/view >/dev/null
-! grep -R '<s-' templates/default/ui_components >/dev/null
+grep -q '<s-l1.heading' templates/default/ui_components/l2/page_header.scale
+grep -q '<s-l1.text-input' templates/default/ui_components/l2/auth_form.scale
+grep -q '<s-l2.page-header' templates/default/ui_components/l3/home_page.scale
+grep -q '<s-l1.action-link' templates/default/ui_components/l3/home_page.scale
+! grep -R '<s-l1' templates/default/view >/dev/null
+! grep -R '<s-' templates/default/ui_components/l1 >/dev/null
+! grep -R -E '<s-l[23]' templates/default/ui_components/l2 >/dev/null
+! grep -R '<s-l3' templates/default/ui_components/l3 >/dev/null
 ! find templates/default/view -name '*.html' -print -quit | grep -q .
 ! find templates/default/ui_components -name '*.html' -print -quit | grep -q .
 ! find templates/default/ui_components -name '*.scales' -print -quit | grep -q .

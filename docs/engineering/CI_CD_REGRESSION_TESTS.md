@@ -119,7 +119,8 @@ Future checks:
 - generated apps include `.scale` components under `ui_components/l1`,
   `ui_components/l2`, and `ui_components/l3`;
 - generated `.skin` files compose scale components, including `layout.scale`;
-- generated `.scale` files never contain Scale component tags;
+- generated `.scale` files obey the L1/L2/L3 component hierarchy;
+- invalid component hierarchy edges return template errors;
 - `sealion format` rewrites compact passover arrays and is idempotent;
 - restart behavior preserves Postgres data;
 - environment schema rejects missing required values.

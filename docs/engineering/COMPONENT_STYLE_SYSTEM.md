@@ -58,11 +58,16 @@ already in scope. Use explicit props only for aliases or literals, such as
 `<s-l3.example :title="page_title" label="Save" />`.
 `sealion format` expands passover arrays into this multiline style.
 
-Components receive only props passed by their caller. `.scale` files do not
-embed other `.scale` files; all organization, arrangement, and embedding across
-components belongs in `.skin` files. Dotted component names map to `.scale`
-paths, so `s-l3.dashboard-page` resolves to
-`ui_components/l3/dashboard_page.scale`.
+Components receive only props passed by their caller. Component composition is
+level-checked:
+
+- `.skin` files may use L2 and L3 components only;
+- L1 primitives do not use other components;
+- L2 pattern components may use L1 primitives only;
+- L3 product/domain components may use L1 primitives and L2 patterns.
+
+Dotted component names map to `.scale` paths, so `s-l3.dashboard-page` resolves
+to `ui_components/l3/dashboard_page.scale`.
 
 Components can attach a style specification to rendered markup:
 
@@ -123,7 +128,7 @@ The component style system needs dedicated regression coverage:
 
 - view files stay import-only and do not own CSS;
 - components use `.scale`, not `.html`;
-- `.scale` files do not contain Scale component tags;
+- component calls obey the L1/L2/L3 hierarchy;
 - `sealion format` is idempotent for `.skin` and `.scale` files;
 - L1/L2/L3 component directories exist in generated apps;
 - utility parser accepts valid specs and rejects unknown utilities;

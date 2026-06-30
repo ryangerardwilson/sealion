@@ -22,6 +22,13 @@
 
 PGconn *db = NULL;
 
+typedef enum {
+  TEMPLATE_SKIN = 0,
+  TEMPLATE_L1 = 1,
+  TEMPLATE_L2 = 2,
+  TEMPLATE_L3 = 3
+} TemplateLevel;
+
 void fatal(const char *message) {
   fprintf(stderr, "%s\n", message);
   exit(1);
@@ -231,6 +238,50 @@ static bool copy_component_tag_name(char *out, size_t out_len, const char *start
   }
   out[len] = '\0';
   return true;
+}
+
+static bool component_level_from_name(const char *name, TemplateLevel *level) {
+  if (strncmp(name, "l1/", 3) == 0 && name[3]) {
+    *level = TEMPLATE_L1;
+    return true;
+  }
+  if (strncmp(name, "l2/", 3) == 0 && name[3]) {
+    *level = TEMPLATE_L2;
+    return true;
+  }
+  if (strncmp(name, "l3/", 3) == 0 && name[3]) {
+    *level = TEMPLATE_L3;
+    return true;
+  }
+  return false;
+}
+
+static const char *template_level_name(TemplateLevel level) {
+  switch (level) {
+    case TEMPLATE_SKIN:
+      return "skin";
+    case TEMPLATE_L1:
+      return "l1";
+    case TEMPLATE_L2:
+      return "l2";
+    case TEMPLATE_L3:
+      return "l3";
+  }
+  return "unknown";
+}
+
+static bool component_allowed_in_context(TemplateLevel context, TemplateLevel target) {
+  switch (context) {
+    case TEMPLATE_SKIN:
+      return target == TEMPLATE_L2 || target == TEMPLATE_L3;
+    case TEMPLATE_L1:
+      return false;
+    case TEMPLATE_L2:
+      return target == TEMPLATE_L1;
+    case TEMPLATE_L3:
+      return target == TEMPLATE_L1 || target == TEMPLATE_L2;
+  }
+  return false;
 }
 
 static bool copy_prop_name(char *out, size_t out_len, const char *start, size_t len) {
@@ -489,11 +540,13 @@ static bool render_template_file(
   size_t var_count,
   char *out,
   size_t out_len,
+  TemplateLevel context,
   int depth
 );
 
 static bool render_component(
   const char *component_name,
+  TemplateLevel context,
   const ViewVar *vars,
   size_t var_count,
   char *out,
@@ -501,9 +554,23 @@ static bool render_component(
   int depth
 ) {
   char path[256];
+  TemplateLevel target;
   if (depth >= MAX_COMPONENT_DEPTH) return false;
+  if (!component_level_from_name(component_name, &target)) {
+    fprintf(stderr, "template error: component s-%s must live under l1, l2, or l3\n", component_name);
+    return false;
+  }
+  if (!component_allowed_in_context(context, target)) {
+    fprintf(
+      stderr,
+      "template error: %s templates cannot use s-%s components\n",
+      template_level_name(context),
+      component_name
+    );
+    return false;
+  }
   snprintf(path, sizeof(path), "ui_components/%s.scale", component_name);
-  return render_template_file(path, vars, var_count, out, out_len, depth + 1);
+  return render_template_file(path, vars, var_count, out, out_len, target, depth + 1);
 }
 
 static bool render_template_text(
@@ -512,6 +579,7 @@ static bool render_template_text(
   size_t var_count,
   char *out,
   size_t out_len,
+  TemplateLevel context,
   int depth
 ) {
   const char *cursor = template_text;
@@ -530,7 +598,6 @@ static bool render_template_text(
     if (!append_bytes(out, out_len, &used, cursor, (size_t)(start - cursor))) return false;
 
     if (start == component) {
-      if (depth > 0) return false;
       char component_name[128];
       char component_tag_name[128];
       char prop_names[MAX_COMPONENT_PROPS][MAX_PROP_NAME];
@@ -577,7 +644,7 @@ static bool render_template_text(
         }
         memcpy(slot_template, end, slot_len);
         slot_template[slot_len] = '\0';
-        if (!render_template_text(slot_template, vars, var_count, slot_content, MAX_VIEW, depth)) {
+        if (!render_template_text(slot_template, vars, var_count, slot_content, MAX_VIEW, context, depth)) {
           free(slot_template);
           free(slot_content);
           return false;
@@ -590,7 +657,7 @@ static bool render_template_text(
         end = block_end;
       }
 
-      if (!render_component(component_name, props, prop_count, rendered, sizeof(rendered), depth)) {
+      if (!render_component(component_name, context, props, prop_count, rendered, sizeof(rendered), depth)) {
         free(slot_template);
         free(slot_content);
         return false;
@@ -630,13 +697,14 @@ static bool render_template_file(
   size_t var_count,
   char *out,
   size_t out_len,
+  TemplateLevel context,
   int depth
 ) {
   char template_text[MAX_VIEW];
   if (!read_template_file(path, template_text, sizeof(template_text))) {
     return false;
   }
-  return render_template_text(template_text, vars, var_count, out, out_len, depth);
+  return render_template_text(template_text, vars, var_count, out, out_len, context, depth);
 }
 
 static bool render_page(
@@ -656,7 +724,7 @@ static bool render_page(
   for (size_t i = 0; i < var_count; i++) {
     view_vars[i + 2] = vars[i];
   }
-  return render_template_file(view_path, view_vars, var_count + 2, out, out_len, 0);
+  return render_template_file(view_path, view_vars, var_count + 2, out, out_len, TEMPLATE_SKIN, 0);
 }
 
 void respond_view(

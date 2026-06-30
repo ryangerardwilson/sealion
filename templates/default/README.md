@@ -45,11 +45,13 @@ passover arrays into one variable per line. Skin files can also wrap content
 with block components, such as `<s-l2.layout>...</s-l2.layout>`. Use explicit
 props only for aliases or literals, such as
 `<s-l3.example :title="page_title" label="Save" />`. Components receive only the
-props passed by their caller. Scale files do not embed other scale files;
-composition belongs in `.skin`. `s-l3.dashboard-page` maps to
-`ui_components/l3/dashboard_page.scale`. Sealion renders `.scale` components
-inside `.skin` views, with escaped variables via `{{ name }}` and trusted raw
-slots via `{!! content !!}`.
+props passed by their caller. Skins may use only L2 and L3 components. L1
+primitives may be used only inside L2 and L3 components; L2 patterns may be used
+inside skins and L3 components; L3 product components may be used in skins.
+`s-l3.dashboard-page` maps to `ui_components/l3/dashboard_page.scale`. Sealion
+renders `.scale` components inside `.skin` views, with escaped variables via
+`{{ name }}`, trusted raw slots via `{!! content !!}`, and level-checked
+component composition.
 
 Demo login:
 

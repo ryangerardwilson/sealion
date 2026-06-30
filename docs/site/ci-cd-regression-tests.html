@@ -46,7 +46,7 @@
           <li><strong>Postgres integration:</strong> tests readiness, pooling, migrations, transactions, and parameterized queries.</li>
           <li><strong>Container and IaC:</strong> validates Compose generation, service separation, health checks, file-watch rebuilds for source, model, controller, view, component, and Dockerfile changes, external URL logs, auth redirects, and environment schemas.</li>
           <li><strong>View templates:</strong> protects import-only <code>view/*.skin</code> files so generated apps do not require C string literals for page flow.</li>
-          <li><strong>Components:</strong> protects <code>.scale</code> files under <code>ui_components/l1</code>, <code>ui_components/l2</code>, and <code>ui_components/l3</code>, and verifies that composition happens in <code>.skin</code> files rather than nested inside scale files.</li>
+          <li><strong>Components:</strong> protects <code>.scale</code> files under <code>ui_components/l1</code>, <code>ui_components/l2</code>, and <code>ui_components/l3</code>, verifies the allowed hierarchy edges, and checks invalid edges return template errors.</li>
           <li><strong>Formatter:</strong> verifies <code>sealion format</code> rewrites compact passover arrays and is idempotent.</li>
           <li><strong>CLI golden tests:</strong> protects scaffolding, deterministic generated files, and actionable command errors.</li>
           <li><strong>Security regression:</strong> protects cookies, CSRF, upload limits, SQL parameterization, and secret handling.</li>

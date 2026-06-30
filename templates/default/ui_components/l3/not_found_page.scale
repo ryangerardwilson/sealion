@@ -1,2 +1,2 @@
-<h1>Not found</h1>
-<p class="muted">The requested page does not exist.</p>
+<s-l2.page-header title="Not found" />
+<s-l1.muted-text text="The requested page does not exist." />

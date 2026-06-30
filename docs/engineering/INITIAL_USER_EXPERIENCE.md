@@ -42,9 +42,9 @@ with same-name passover, such as `<s-l3.dashboard-page :passover=[user_email] />
 readability.
 Explicit props remain available for aliases or literals, such as
 `<s-l3.example :title="page_title" label="Save" />`.
-In this model, `.scale` components attach to `.skin` view files, and `.skin`
-files are the only place where scale components are organized, arranged, or
-embedded together.
+In this model, component composition is level-checked: `.skin` files may use L2
+and L3 components, L2 components may use L1 primitives, L3 components may use
+L1 primitives and L2 patterns, and L1 primitives stay primitive.
 
 The generated app includes:
 

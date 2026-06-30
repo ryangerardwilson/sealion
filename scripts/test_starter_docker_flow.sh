@@ -131,4 +131,27 @@ grep -q "You are logged in as" "$tmp_dir/dashboard.html"
 ! grep -q "{{" "$tmp_dir/dashboard.html"
 ! grep -q "{!!" "$tmp_dir/dashboard.html"
 
+printf '<s-l1.heading text="Bad skin use" />\n' > view/home.skin
+printf '<s-l2.page-header title="Bad l2 use" />\n' > ui_components/l2/auth_form.scale
+SEALION_HTTP_PORT="$port" docker compose up -d --build app
+
+for _ in $(seq 1 60); do
+  if curl -fsS "http://localhost:$port/health" >/dev/null 2>&1; then
+    break
+  fi
+  sleep 1
+done
+
+curl -sS -D "$tmp_dir/invalid-home.headers" -o "$tmp_dir/invalid-home.body" "http://localhost:$port/"
+grep -q "500 Internal Server Error" "$tmp_dir/invalid-home.headers"
+grep -q "Could not render the requested view" "$tmp_dir/invalid-home.body"
+
+curl -sS -D "$tmp_dir/invalid-login.headers" -o "$tmp_dir/invalid-login.body" "http://localhost:$port/login"
+grep -q "500 Internal Server Error" "$tmp_dir/invalid-login.headers"
+grep -q "Could not render the requested view" "$tmp_dir/invalid-login.body"
+
+docker compose logs app > "$tmp_dir/invalid-app.log"
+grep -q "skin templates cannot use s-l1/heading components" "$tmp_dir/invalid-app.log"
+grep -q "l2 templates cannot use s-l2/page_header components" "$tmp_dir/invalid-app.log"
+
 printf 'starter docker flow ok\n'

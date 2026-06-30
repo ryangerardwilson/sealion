@@ -31,8 +31,15 @@ test -f "$tmp_dir/demo/view/register.skin"
 test -f "$tmp_dir/demo/view/dashboard.skin"
 test -f "$tmp_dir/demo/view/not_found.skin"
 test -d "$tmp_dir/demo/ui_components/l1"
+test -f "$tmp_dir/demo/ui_components/l1/action_link.scale"
+test -f "$tmp_dir/demo/ui_components/l1/button.scale"
+test -f "$tmp_dir/demo/ui_components/l1/form_label.scale"
+test -f "$tmp_dir/demo/ui_components/l1/heading.scale"
+test -f "$tmp_dir/demo/ui_components/l1/muted_text.scale"
+test -f "$tmp_dir/demo/ui_components/l1/text_input.scale"
 test -f "$tmp_dir/demo/ui_components/l2/layout.scale"
 test -f "$tmp_dir/demo/ui_components/l2/auth_form.scale"
+test -f "$tmp_dir/demo/ui_components/l2/page_header.scale"
 test -f "$tmp_dir/demo/ui_components/l3/home_page.scale"
 test -f "$tmp_dir/demo/ui_components/l3/dashboard_page.scale"
 test -f "$tmp_dir/demo/ui_components/l3/not_found_page.scale"
@@ -56,6 +63,8 @@ grep -q 'admin@sealion.local' "$tmp_dir/demo/controller/auth_controller.c"
 grep -q "render_template_text" "$tmp_dir/demo/src/main.c"
 grep -q "respond_view" "$tmp_dir/demo/src/main.c"
 grep -q "view/%s.skin" "$tmp_dir/demo/src/main.c"
+grep -q "component_level_from_name" "$tmp_dir/demo/src/main.c"
+grep -q "component_allowed_in_context" "$tmp_dir/demo/src/main.c"
 grep -q "parse_passover_props" "$tmp_dir/demo/src/main.c"
 grep -q "find_component_close" "$tmp_dir/demo/src/main.c"
 ! grep -q "view/%s.html" "$tmp_dir/demo/src/main.c"
@@ -85,9 +94,16 @@ grep -Fxq '  <s-l3.dashboard-page :passover=[' "$tmp_dir/demo/view/dashboard.ski
 grep -Fxq '    user_email' "$tmp_dir/demo/view/dashboard.skin"
 grep -q '<s-l3.not-found-page />' "$tmp_dir/demo/view/not_found.skin"
 grep -q "{{ user_email }}" "$tmp_dir/demo/ui_components/l3/dashboard_page.scale"
+grep -q '<s-l1.heading' "$tmp_dir/demo/ui_components/l2/page_header.scale"
+grep -q '<s-l1.text-input' "$tmp_dir/demo/ui_components/l2/auth_form.scale"
+grep -q '<s-l2.page-header' "$tmp_dir/demo/ui_components/l3/home_page.scale"
+grep -q '<s-l1.action-link' "$tmp_dir/demo/ui_components/l3/home_page.scale"
 ! grep -R "{% component" "$tmp_dir/demo/view" "$tmp_dir/demo/ui_components" >/dev/null
 ! grep -R ':auth-title=' "$tmp_dir/demo/view" "$tmp_dir/demo/ui_components/l3" >/dev/null
-! grep -R '<s-' "$tmp_dir/demo/ui_components" >/dev/null
+! grep -R '<s-l1' "$tmp_dir/demo/view" >/dev/null
+! grep -R '<s-' "$tmp_dir/demo/ui_components/l1" >/dev/null
+! grep -R -E '<s-l[23]' "$tmp_dir/demo/ui_components/l2" >/dev/null
+! grep -R '<s-l3' "$tmp_dir/demo/ui_components/l3" >/dev/null
 ! find "$tmp_dir/demo/view" -name '*.html' -print -quit | grep -q .
 ! find "$tmp_dir/demo/ui_components" -name '*.html' -print -quit | grep -q .
 ! find "$tmp_dir/demo/ui_components" -name '*.scales' -print -quit | grep -q .
