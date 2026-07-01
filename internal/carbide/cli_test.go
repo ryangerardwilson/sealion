@@ -112,24 +112,6 @@ func TestRendererStyledLogoUsesGlyphColors(t *testing.T) {
 	}
 }
 
-func TestRendererStyledLogoSheenBrightensGlyphs(t *testing.T) {
-	r := renderer{styled: true}
-
-	got := r.formatLogoLineWithSheen("_o0_", 1)
-	for _, want := range []string{
-		"\033[38;5;255m_",
-		"\033[1;38;5;226mo0",
-		"\033[2;38;5;245m_",
-	} {
-		if !strings.Contains(got, want) {
-			t.Fatalf("sheen logo line = %q, missing %q", got, want)
-		}
-	}
-	if plain := stripANSI(got); plain != "_o0_" {
-		t.Fatalf("sheen logo line strips to %q, want %q", plain, "_o0_")
-	}
-}
-
 func TestRendererPlainOutput(t *testing.T) {
 	var out bytes.Buffer
 	newRenderer(&out).Message(
@@ -196,6 +178,44 @@ func TestServiceProgressFrame(t *testing.T) {
 		if got := serviceProgressFrame(10, test.step, test.state); got != test.want {
 			t.Fatalf("serviceProgressFrame(10, %d, %q) = %q, want %q", test.step, test.state, got, test.want)
 		}
+	}
+}
+
+func TestRendererLogoPacmanLine(t *testing.T) {
+	r := renderer{}
+	tests := []struct {
+		position int
+		step     int
+		want     string
+	}{
+		{-1, 0, " o  "},
+		{1, 0, "_C o"},
+		{1, 1, "_c o"},
+		{4, 0, "_o0_"},
+	}
+	for _, test := range tests {
+		got := r.formatLogoPacmanLine("_o0_", test.position, test.step)
+		if got != test.want {
+			t.Fatalf("formatLogoPacmanLine(position=%d, step=%d) = %q, want %q", test.position, test.step, got, test.want)
+		}
+	}
+}
+
+func TestRendererStyledLogoPacmanLine(t *testing.T) {
+	r := renderer{styled: true}
+
+	got := r.formatLogoPacmanLine("_o0_", 1, 0)
+	for _, want := range []string{
+		"\033[2;38;5;245m_\033[0m",
+		"\033[1;38;5;226mC\033[0m",
+		"\033[2;38;5;220mo\033[0m",
+	} {
+		if !strings.Contains(got, want) {
+			t.Fatalf("styled pacman logo line = %q, missing %q", got, want)
+		}
+	}
+	if plain := stripANSI(got); plain != "_C o" {
+		t.Fatalf("styled pacman logo line strips to %q, want %q", plain, "_C o")
 	}
 }
 

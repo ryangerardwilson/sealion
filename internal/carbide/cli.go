@@ -869,31 +869,17 @@ func (r renderer) AnimateLogo(logo string) {
 	}
 
 	width := maxLineWidth(lines)
-	revealFrames := 18
-	revealSpan := width + (len(lines)-1)*2
-	for frame := 0; frame <= revealFrames; frame++ {
+	chompFrames := width + (len(lines)-1)*2 + 1
+	for frame := 0; frame <= chompFrames; frame++ {
 		if frame > 0 {
 			fmt.Fprintf(r.out, "\033[%dA", len(lines))
 		}
-		progress := revealSpan * frame / revealFrames
 		for index, line := range lines {
-			reveal := clamp(progress-index*2, 0, width)
-			fmt.Fprintf(r.out, "\r\033[K%s\n", r.formatLogoLine(index, visiblePrefix(line, reveal)))
+			position := frame - index*2
+			fmt.Fprintf(r.out, "\r\033[K%s\n", r.formatLogoPacmanLine(line, position, frame+index))
 		}
-		if frame < revealFrames {
-			time.Sleep(12 * time.Millisecond)
-		}
-	}
-
-	sheenFrames := width + len(lines) + 7
-	for frame := 0; frame < sheenFrames; frame += 3 {
-		fmt.Fprintf(r.out, "\033[%dA", len(lines))
-		for index, line := range lines {
-			center := frame - 4 - index
-			fmt.Fprintf(r.out, "\r\033[K%s\n", r.formatLogoLineWithSheen(line, center))
-		}
-		if frame+3 < sheenFrames {
-			time.Sleep(10 * time.Millisecond)
+		if frame < chompFrames {
+			time.Sleep(9 * time.Millisecond)
 		}
 	}
 	fmt.Fprintln(r.out)
@@ -1251,10 +1237,6 @@ func (r renderer) formatService(service string) string {
 }
 
 func (r renderer) formatLogoLine(_ int, line string) string {
-	return r.formatLogoLineWithSheen(line, -1)
-}
-
-func (r renderer) formatLogoLineWithSheen(line string, sheenCenter int) string {
 	if !r.styled {
 		return line
 	}
@@ -1262,7 +1244,7 @@ func (r renderer) formatLogoLineWithSheen(line string, sheenCenter int) string {
 	var out strings.Builder
 	activeColor := ""
 	for i := 0; i < len(line); i++ {
-		color := logoGlyphColor(line[i], logoSheenCovers(sheenCenter, i))
+		color := logoGlyphColor(line[i])
 		if color != activeColor {
 			if activeColor != "" {
 				out.WriteString("\033[0m")
@@ -1282,28 +1264,43 @@ func (r renderer) formatLogoLineWithSheen(line string, sheenCenter int) string {
 	return out.String()
 }
 
-func logoSheenCovers(center int, column int) bool {
-	if center < 0 {
-		return false
+func (r renderer) formatLogoPacmanLine(line string, position int, step int) string {
+	width := len(line)
+	if position >= width {
+		return r.formatLogoLine(0, line)
 	}
-	distance := column - center
-	if distance < 0 {
-		distance = -distance
+
+	var out strings.Builder
+	if position > 0 {
+		out.WriteString(r.formatLogoLine(0, visiblePrefix(line, position)))
 	}
-	return distance <= 1
+	start := clamp(position, 0, width)
+	for column := start; column < width; column++ {
+		switch {
+		case column == position:
+			out.WriteString(r.formatLogoChomper(pacmanMouth(step, "right")))
+		case isCandyPosition(column - position):
+			out.WriteString(r.formatLogoPellet())
+		default:
+			out.WriteByte(' ')
+		}
+	}
+	return out.String()
 }
 
-func logoGlyphColor(ch byte, sheen bool) string {
+func (r renderer) formatLogoChomper(ch byte) string {
+	return r.paint("1;38;5;226", string(ch))
+}
+
+func (r renderer) formatLogoPellet() string {
+	return r.paint("2;38;5;220", "o")
+}
+
+func logoGlyphColor(ch byte) string {
 	switch ch {
 	case '_':
-		if sheen {
-			return "38;5;255"
-		}
 		return "2;38;5;245"
 	case 'o', 'O', '0':
-		if sheen {
-			return "1;38;5;226"
-		}
 		return "38;5;220"
 	default:
 		return ""
