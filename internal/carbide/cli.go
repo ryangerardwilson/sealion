@@ -30,7 +30,8 @@ const defaultTerminalWidth = 80
 const progressStateColumnWidth = 8
 const minimumProgressFrameWidth = 4
 
-const defaultLogoText = `________________________oo_______oo_______oo_________
+const defaultLogoText = `_____________________________________________________
+________________________oo_______oo_______oo_________
 _ooooo___ooooo__oo_ooo__oooooo________oooooo__ooooo__
 oo___oo_oo___oo_ooo___o_oo___oo__oo__oo___oo_oo____o_
 oo______oo___oo_oo______oo___oo__oo__oo___oo_ooooooo_
@@ -868,17 +869,31 @@ func (r renderer) AnimateLogo(logo string) {
 	}
 
 	width := maxLineWidth(lines)
-	frames := 14
-	for frame := 0; frame <= frames; frame++ {
+	revealFrames := 18
+	revealSpan := width + (len(lines)-1)*2
+	for frame := 0; frame <= revealFrames; frame++ {
 		if frame > 0 {
 			fmt.Fprintf(r.out, "\033[%dA", len(lines))
 		}
-		reveal := width * frame / frames
+		progress := revealSpan * frame / revealFrames
 		for index, line := range lines {
+			reveal := clamp(progress-index*2, 0, width)
 			fmt.Fprintf(r.out, "\r\033[K%s\n", r.formatLogoLine(index, visiblePrefix(line, reveal)))
 		}
-		if frame < frames {
-			time.Sleep(16 * time.Millisecond)
+		if frame < revealFrames {
+			time.Sleep(12 * time.Millisecond)
+		}
+	}
+
+	sheenFrames := width + len(lines) + 7
+	for frame := 0; frame < sheenFrames; frame += 3 {
+		fmt.Fprintf(r.out, "\033[%dA", len(lines))
+		for index, line := range lines {
+			center := frame - 4 - index
+			fmt.Fprintf(r.out, "\r\033[K%s\n", r.formatLogoLineWithSheen(line, center))
+		}
+		if frame+3 < sheenFrames {
+			time.Sleep(10 * time.Millisecond)
 		}
 	}
 	fmt.Fprintln(r.out)
@@ -1206,6 +1221,16 @@ func padRight(value string, width int) string {
 	return value + strings.Repeat(" ", width-len(value))
 }
 
+func clamp(value int, minValue int, maxValue int) int {
+	if value < minValue {
+		return minValue
+	}
+	if value > maxValue {
+		return maxValue
+	}
+	return value
+}
+
 func (r renderer) formatKey(key string) string {
 	return r.paint("2;38;5;245", key)
 }
@@ -1226,6 +1251,10 @@ func (r renderer) formatService(service string) string {
 }
 
 func (r renderer) formatLogoLine(_ int, line string) string {
+	return r.formatLogoLineWithSheen(line, -1)
+}
+
+func (r renderer) formatLogoLineWithSheen(line string, sheenCenter int) string {
 	if !r.styled {
 		return line
 	}
@@ -1233,7 +1262,7 @@ func (r renderer) formatLogoLine(_ int, line string) string {
 	var out strings.Builder
 	activeColor := ""
 	for i := 0; i < len(line); i++ {
-		color := logoGlyphColor(line[i])
+		color := logoGlyphColor(line[i], logoSheenCovers(sheenCenter, i))
 		if color != activeColor {
 			if activeColor != "" {
 				out.WriteString("\033[0m")
@@ -1253,11 +1282,28 @@ func (r renderer) formatLogoLine(_ int, line string) string {
 	return out.String()
 }
 
-func logoGlyphColor(ch byte) string {
+func logoSheenCovers(center int, column int) bool {
+	if center < 0 {
+		return false
+	}
+	distance := column - center
+	if distance < 0 {
+		distance = -distance
+	}
+	return distance <= 1
+}
+
+func logoGlyphColor(ch byte, sheen bool) string {
 	switch ch {
 	case '_':
+		if sheen {
+			return "38;5;255"
+		}
 		return "2;38;5;245"
 	case 'o', 'O', '0':
+		if sheen {
+			return "1;38;5;226"
+		}
 		return "38;5;220"
 	default:
 		return ""

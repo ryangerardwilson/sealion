@@ -67,6 +67,7 @@ func TestBareCommandPrintsCommandList(t *testing.T) {
 
 	got := out.String()
 	for _, want := range []string{
+		"_____________________________________________________",
 		"________________________oo_______oo_______oo_________",
 		"Carbide 0.1.0-dev",
 		"Usage:",
@@ -108,6 +109,24 @@ func TestRendererStyledLogoUsesGlyphColors(t *testing.T) {
 	}
 	if plain := stripANSI(got); plain != "_o0Ox" {
 		t.Fatalf("styled logo line strips to %q, want %q", plain, "_o0Ox")
+	}
+}
+
+func TestRendererStyledLogoSheenBrightensGlyphs(t *testing.T) {
+	r := renderer{styled: true}
+
+	got := r.formatLogoLineWithSheen("_o0_", 1)
+	for _, want := range []string{
+		"\033[38;5;255m_",
+		"\033[1;38;5;226mo0",
+		"\033[2;38;5;245m_",
+	} {
+		if !strings.Contains(got, want) {
+			t.Fatalf("sheen logo line = %q, missing %q", got, want)
+		}
+	}
+	if plain := stripANSI(got); plain != "_o0_" {
+		t.Fatalf("sheen logo line strips to %q, want %q", plain, "_o0_")
 	}
 }
 
