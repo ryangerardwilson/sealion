@@ -1,6 +1,6 @@
 name = "__PROJECT_NAME__"
 slug = "__PROJECT_SLUG__"
-sealion_version = "0.1.0-dev"
+carbide_version = "0.1.0-dev"
 
 [dev]
 host = "localhost"

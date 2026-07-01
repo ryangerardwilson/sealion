@@ -1,4 +1,4 @@
-module sealionapp
+module carbideapp
 
 go 1.23.0
 

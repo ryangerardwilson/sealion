@@ -52,7 +52,7 @@ const server = Bun.serve({
   }
 });
 
-console.log(`Sealion Bun frontend listening inside container on :${server.port}`);
+console.log(`Carbide Bun frontend listening inside container on :${server.port}`);
 if (publicUrl) {
   console.log(`browser entrypoint ${publicUrl}`);
 }

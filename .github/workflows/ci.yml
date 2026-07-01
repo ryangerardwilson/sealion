@@ -28,7 +28,7 @@ jobs:
           go-version-file: go.mod
 
       - name: Check shell syntax
-        run: bash -n scripts/*.sh bin/sealion install.sh
+        run: bash -n scripts/*.sh bin/carbide bin/sealion install.sh
 
       - name: Test Go CLI
         run: go test ./...

@@ -1,6 +1,6 @@
 # Directory Structure
 
-Sealion uses a narrow structure at the start so future framework code,
+Carbide uses a narrow structure at the start so future framework code,
 generated apps, infrastructure, tests, and documentation have clear ownership.
 
 ```text
@@ -10,11 +10,14 @@ generated apps, infrastructure, tests, and documentation have clear ownership.
 |       |-- ci.yml
 |       `-- pages.yml
 |-- bin/
-|   `-- sealion
+|   `-- carbide
 |-- cmd/
-|   `-- sealion/
-|       |-- main.go
-|       `-- main_test.go
+|   `-- carbide/
+|       `-- main.go
+|-- internal/
+|   `-- carbide/
+|       |-- cli.go
+|       `-- cli_test.go
 |-- docs/
 |   |-- engineering/
 |   |   |-- COMPONENT_STYLE_SYSTEM.md
@@ -33,7 +36,7 @@ generated apps, infrastructure, tests, and documentation have clear ownership.
 |-- examples/
 |   `-- hello/
 |-- include/
-|   `-- sealion/
+|   `-- carbide/
 |       `-- ui/
 |-- infra/
 |   |-- compose/
@@ -57,7 +60,7 @@ generated apps, infrastructure, tests, and documentation have clear ownership.
 |       |-- model/
 |       |   |-- session.go
 |       |   `-- user.go
-|       |-- sealion.toml
+|       |-- carbide.toml
 |       |-- src/
 |       |   `-- main.go
 |       `-- view/
@@ -83,21 +86,22 @@ generated apps, infrastructure, tests, and documentation have clear ownership.
 ## Ownership
 
 - `.github/workflows/`: CI and documentation deployment.
-- `bin/sealion`: source checkout launcher for the Go CLI.
-- `cmd/sealion/`: Go implementation of the installable CLI.
+- `bin/carbide`: source checkout launcher for the Go CLI.
+- `cmd/carbide/`: installable CLI entrypoint.
+- `internal/carbide/`: Go implementation of the CLI and its unit tests.
 - `docs/engineering/`: source-of-truth engineering plans.
 - `docs/site/`: static GitHub Pages artifact.
 - `examples/`: generated or hand-written sample apps.
-- `include/sealion/`: reserved public framework API surface.
-- `include/sealion/ui/`: reserved public frontend helper API surface.
+- `include/carbide/`: reserved public framework API surface.
+- `include/carbide/ui/`: reserved public frontend helper API surface.
 - `infra/compose/`: local Compose templates and generated examples.
 - `infra/schemas/`: schemas for infrastructure, environment, and app metadata.
 - `scripts/`: repo-owned checks and maintenance commands.
 - `src/`: framework implementation.
 - `src/ui/`: component rendering, utility parsing, token resolution, and CSS
   generation.
-- `templates/default/`: generated starter app used by `sealion new` and
-  `sealion init`.
+- `templates/default/`: generated starter app used by `carbide new` and
+  `carbide init`.
 - `templates/default/model/`: generated Postgres-backed model code.
 - `templates/default/controller/`: generated request-flow handlers.
 - `templates/default/src/`: generated Go HTTP/API server.
@@ -109,7 +113,7 @@ generated apps, infrastructure, tests, and documentation have clear ownership.
 - `tests/unit/`: small deterministic unit tests.
 - `go.mod`: Go module definition for the CLI.
 - `install.sh`: GitHub URL installer that builds the Go CLI and places
-  `sealion` on the user's PATH.
+  `carbide` on the user's PATH.
 
 ## First Implementation Rule
 

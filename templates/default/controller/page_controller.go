@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"sealionapp/model"
+	"carbideapp/model"
 )
 
 type App struct {

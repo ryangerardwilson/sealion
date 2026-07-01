@@ -1,3 +1,3 @@
-module github.com/ryangerardwilson/sealion
+module github.com/ryangerardwilson/carbide
 
 go 1.22

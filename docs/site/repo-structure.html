@@ -3,14 +3,14 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Directory Structure | Sealion</title>
-    <meta name="description" content="The initial repository structure for Sealion.">
+    <title>Directory Structure | Carbide</title>
+    <meta name="description" content="The initial repository structure for Carbide.">
     <link rel="stylesheet" href="assets/styles.css">
   </head>
   <body>
     <header class="hero">
       <div class="shell">
-        <p class="eyebrow"><a href="index.html">Sealion docs</a></p>
+        <p class="eyebrow"><a href="index.html">Carbide docs</a></p>
         <h1>Directory structure</h1>
         <p class="lead">The repo separates framework source, generated Bun/React/Tailwind frontend code, Go backend code, tests, infrastructure, automation, and published documentation from the start.</p>
       </div>
@@ -21,13 +21,14 @@
         <h2>Layout</h2>
         <pre><code>.
 |-- .github/workflows/
-|-- bin/sealion
-|-- cmd/sealion/
+|-- bin/carbide
+|-- cmd/carbide/
+|-- internal/carbide/
 |-- docs/engineering/
 |-- docs/site/
 |-- examples/hello/
-|-- include/sealion/
-|-- include/sealion/ui/
+|-- include/carbide/
+|-- include/carbide/ui/
 |-- infra/compose/
 |-- infra/schemas/
 |-- scripts/
@@ -50,18 +51,19 @@
         <h2>Ownership</h2>
         <ul>
           <li><strong>.github/workflows:</strong> CI and documentation deployment.</li>
-          <li><strong>bin/sealion:</strong> source checkout launcher for the Go CLI.</li>
-          <li><strong>cmd/sealion:</strong> Go implementation of the installable CLI.</li>
+          <li><strong>bin/carbide:</strong> source checkout launcher for the Go CLI.</li>
+          <li><strong>cmd/carbide:</strong> installable CLI entrypoint.</li>
+          <li><strong>internal/carbide:</strong> Go implementation of the CLI and its unit tests.</li>
           <li><strong>docs/engineering:</strong> source-of-truth engineering plans.</li>
           <li><strong>docs/site:</strong> static GitHub Pages artifact.</li>
           <li><strong>examples:</strong> generated or hand-written sample apps.</li>
-          <li><strong>include/sealion:</strong> reserved public framework API surface.</li>
-          <li><strong>include/sealion/ui:</strong> reserved public frontend helper API surface.</li>
+          <li><strong>include/carbide:</strong> reserved public framework API surface.</li>
+          <li><strong>include/carbide/ui:</strong> reserved public frontend helper API surface.</li>
           <li><strong>infra:</strong> Compose templates and infrastructure schemas.</li>
           <li><strong>scripts:</strong> repo-owned checks and maintenance commands.</li>
           <li><strong>src:</strong> framework implementation.</li>
           <li><strong>src/ui:</strong> future framework frontend helper APIs.</li>
-          <li><strong>templates/default:</strong> starter app used by <code>sealion new</code> and <code>sealion init</code>.</li>
+          <li><strong>templates/default:</strong> starter app used by <code>carbide new</code> and <code>carbide init</code>.</li>
           <li><strong>templates/default/model:</strong> generated Postgres-backed model code.</li>
           <li><strong>templates/default/controller:</strong> generated request-flow handlers.</li>
           <li><strong>templates/default/src:</strong> generated Go HTTP/API server.</li>

@@ -3,14 +3,14 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>CI/CD Regression Plan | Sealion</title>
-    <meta name="description" content="The CI/CD regression plan for Sealion.">
+    <title>CI/CD Regression Plan | Carbide</title>
+    <meta name="description" content="The CI/CD regression plan for Carbide.">
     <link rel="stylesheet" href="assets/styles.css">
   </head>
   <body>
     <header class="hero">
       <div class="shell">
-        <p class="eyebrow"><a href="index.html">Sealion docs</a></p>
+        <p class="eyebrow"><a href="index.html">Carbide docs</a></p>
         <h1>CI/CD regression plan</h1>
         <p class="lead">The test system starts with repository contracts and grows into Go backend, Postgres, container, IaC, security, and documentation regression suites.</p>
       </div>
@@ -40,7 +40,7 @@
         <h2>Regression Suites</h2>
         <ul>
           <li><strong>Repository contract:</strong> protects required files, docs, workflows, and product constraints.</li>
-          <li><strong>CLI scaffold:</strong> tests the Go CLI, shared output renderer, <code>sealion new</code>, <code>sealion init</code>, compact <code>run dev</code> output, status table rendering, detach-without-teardown on <code>Ctrl+C</code>, explicit <code>stop dev</code> teardown, full-width TTY-only per-container progress behavior including no-color terminals, timestamped service-log streaming, live log follow, structured log querying, placeholder replacement, and empty-directory enforcement.</li>
+          <li><strong>CLI scaffold:</strong> tests the Go CLI, shared output renderer, <code>carbide new</code>, <code>carbide init</code>, compact <code>run dev</code> output, status table rendering, detach-without-teardown on <code>Ctrl+C</code>, explicit <code>stop dev</code> teardown, full-width TTY-only per-container progress behavior including no-color terminals, timestamped service-log streaming, live log follow, structured log querying, placeholder replacement, and empty-directory enforcement.</li>
           <li><strong>Backend build and API:</strong> protects generated backend builds, public API behavior, and release compatibility.</li>
           <li><strong>Unit tests:</strong> protects router, request, response, middleware, config, and logging behavior.</li>
           <li><strong>Compatibility and race tests:</strong> exposes concurrency and generated app compatibility failures.</li>
@@ -56,7 +56,7 @@
 
       <section>
         <h2>Implemented Now</h2>
-        <pre><code>bash -n scripts/*.sh bin/sealion install.sh
+        <pre><code>bash -n scripts/*.sh bin/carbide bin/sealion install.sh
 go test ./...
 bash scripts/check_repo_contract.sh
 bash scripts/test_cli_scaffold.sh

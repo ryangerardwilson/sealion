@@ -1,6 +1,6 @@
-# Sealion
+# Carbide
 
-Sealion is an experimental, Laravel-inspired full-stack framework with a React
+Carbide is an experimental, Laravel-inspired full-stack framework with a React
 frontend container, a Go backend container, and a mandatory Postgres database.
 
 The goal is not to copy Laravel line by line. The goal is to find the smallest
@@ -11,7 +11,7 @@ containers feel coherent, productive, and safe enough to be practical.
 
 The product bet is Docker-first convention over host setup: React owns the
 browser, Go owns the application API, and Postgres owns durable relational
-state. Sealion should make that full-stack default feel boring, inspectable, and
+state. Carbide should make that full-stack default feel boring, inspectable, and
 fast to start:
 
 - one Bun/React/Tailwind frontend container
@@ -24,13 +24,13 @@ fast to start:
 - one Go CLI entry point
 - one opinionated set of security defaults
 
-Sealion should make the hard parts visible instead of hiding them behind magic.
+Carbide should make the hard parts visible instead of hiding them behind magic.
 
 ## Core Principles
 
 - **Container-first:** every app runs through generated containers, not host
   Bun, host backend toolchains, or hidden local services.
-- **Go CLI:** `sealion` is a compiled Go CLI. It owns scaffolding, upgrades,
+- **Go CLI:** `carbide` is a compiled Go CLI. It owns scaffolding, upgrades,
   local port selection, structured terminal output, queryable dev logs, and the
   Docker Compose development lifecycle.
 - **React default frontend:** the browser UI lives in the frontend container.
@@ -38,7 +38,7 @@ Sealion should make the hard parts visible instead of hiding them behind magic.
   developer's host machine.
 - **Go backend:** auth, sessions, validation, API routes, and business logic
   live in the backend container.
-- **Postgres-only:** Sealion targets Postgres as the mandatory database, not as
+- **Postgres-only:** Carbide targets Postgres as the mandatory database, not as
   one interchangeable adapter among many.
 - **Separate runtime boundaries:** frontend, backend, and database containers
   are separate services with separate lifecycles, health checks, logs, and
@@ -70,7 +70,7 @@ Sealion should make the hard parts visible instead of hiding them behind magic.
 
 ## Runtime Topology
 
-The default Sealion app runs as three containers:
+The default Carbide app runs as three containers:
 
 1. the frontend container, which owns Bun, React, Tailwind, browser routing,
    the API proxy, and the public host port;
@@ -87,7 +87,7 @@ restartable, inspectable, and replaceable.
 
 ## Infrastructure As Code Contract
 
-Sealion apps must be reproducible from the repository. Runtime behavior should
+Carbide apps must be reproducible from the repository. Runtime behavior should
 not depend on manual console setup, undocumented shell history, or hidden
 machine state.
 
@@ -106,7 +106,7 @@ At minimum, each app must keep these contracts in version control:
   supported production target as those targets become official;
 - framework and app version gates for infrastructure changes.
 
-The Sealion CLI should generate and validate these files instead of asking
+The Carbide CLI should generate and validate these files instead of asking
 developers to maintain ad hoc infrastructure by hand. Infrastructure is part of
 the application source, and changes to it must be reviewable, diffable, and
 recoverable.
@@ -116,7 +116,7 @@ recoverable.
 The public documentation site is published from `docs/site` to GitHub Pages at:
 
 ```text
-https://sealion.ryangerardwilson.com
+https://carbide.ryangerardwilson.com
 ```
 
 CI starts with repository contract checks and grows into the full framework
@@ -127,37 +127,37 @@ The frontend contract lives in `docs/engineering/COMPONENT_STYLE_SYSTEM.md`.
 ## Install And Start
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/ryangerardwilson/sealion/main/install.sh | bash
-sealion new demo
+curl -fsSL https://raw.githubusercontent.com/ryangerardwilson/carbide/main/install.sh | bash
+carbide new demo
 cd demo
-sealion run dev
-sealion status
-sealion stop dev
+carbide run dev
+carbide status
+carbide stop dev
 ```
 
-The installer currently builds the `sealion` CLI with Go, so Go must be
+The installer currently builds the `carbide` CLI with Go, so Go must be
 available on the host machine. Generated apps still run Bun, the Go backend
 build, and Postgres inside containers.
 
-`sealion new <project-name>` creates a new project directory. `sealion init`
-initializes the current directory only when it is empty. `sealion run dev`
+`carbide new <project-name>` creates a new project directory. `carbide init`
+initializes the current directory only when it is empty. `carbide run dev`
 starts the generated frontend, backend, and Postgres containers with register,
 login, logout, and dashboard already wired. It prints the working app and API
 URLs, preferring `http://localhost:8080` and silently selecting another local
-port when 8080 is already in use. Set `SEALION_HTTP_PORT=<port>` to choose the
+port when 8080 is already in use. Set `CARBIDE_HTTP_PORT=<port>` to choose the
 host port explicitly.
 
-`Ctrl+C` in `sealion run dev` detaches from live log streaming and leaves the
-containers running. `sealion follow logs` attaches to live container logs again.
-`sealion status` prints a table of Compose services, container names, published
-host ports, internal container ports, and status. `sealion stop dev` stops the
-local development stack. `sealion help` prints the command reference.
-`sealion upgrade` upgrades the installed CLI when a newer GitHub commit is
-available. `sealion logs` reads the structured dev log file written by
-`sealion run dev`; examples include `sealion logs service backend` and
-`sealion logs containing "/api/login" json`.
+`Ctrl+C` in `carbide run dev` detaches from live log streaming and leaves the
+containers running. `carbide follow logs` attaches to live container logs again.
+`carbide status` prints a table of Compose services, container names, published
+host ports, internal container ports, and status. `carbide stop dev` stops the
+local development stack. `carbide help` prints the command reference.
+`carbide upgrade` upgrades the installed CLI when a newer GitHub commit is
+available. `carbide logs` reads the structured dev log file written by
+`carbide run dev`; examples include `carbide logs service backend` and
+`carbide logs containing "/api/login" json`.
 
-When Docker Compose supports file watch, `sealion run dev` starts the stack with
+When Docker Compose supports file watch, `carbide run dev` starts the stack with
 quiet Compose output, watch enabled, and live logs streamed below the startup
 summary. Edits under `view/web/src/`, `src/`, `model/`, `controller/`, view
 package/config files, or `Dockerfile` rebuild and replace the relevant
@@ -166,13 +166,13 @@ container.
 CLI output is rendered through a small Go output layer: headings, aligned
 labels, compact tables, TTY-only color, full-width terminal-only
 ILoveCandy-style per-container startup and shutdown animation, timestamped log
-rows, and plain text when piped or captured by scripts. `sealion run dev`
+rows, and plain text when piped or captured by scripts. `carbide run dev`
 prints only the working app/API URLs before the startup animation and log
 stream. Logs begin only after Compose reports the stack ready. `NO_COLOR`
 disables ANSI color without disabling the terminal startup or shutdown
 animation. Every streamed frontend, backend, database, and watch event is also
 written as JSONL to
-`.sealion/log/dev.jsonl` so humans, scripts, and AI agents can inspect or query
+`.carbide/log/dev.jsonl` so humans, scripts, and AI agents can inspect or query
 the whole local system from one command.
 
 Generated apps use an MVC shape. `view/web/` owns the Bun server, Tailwind
@@ -192,7 +192,7 @@ owns the Go HTTP/API server.
 - Choose Go version, build system, and test runner.
 - Create the canonical app directory layout.
 - Define the request, response, app, and service lifecycle contracts.
-- Define the install URL, `sealion new`, `sealion init`, and `sealion run dev`
+- Define the install URL, `carbide new`, `carbide init`, and `carbide run dev`
   command contracts.
 - Publish a Bun-served React login/dashboard starter backed by Tailwind, a Go
   API, and Postgres.
@@ -254,7 +254,7 @@ owns the Go HTTP/API server.
 
 ### Phase 7: Developer Experience
 
-- Harden the `sealion` Go CLI.
+- Harden the `carbide` Go CLI.
 - Add project scaffolding.
 - Add migration generation.
 - Add infrastructure generation, validation, and diff commands.

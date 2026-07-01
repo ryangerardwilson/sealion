@@ -4,10 +4,10 @@ import (
 	"net/http"
 	"time"
 
-	"sealionapp/model"
+	"carbideapp/model"
 )
 
-const sessionCookie = "sealion_session"
+const sessionCookie = "carbide_session"
 
 func (a *App) handleRegister(w http.ResponseWriter, r *http.Request) {
 	if !requireMethod(w, r, http.MethodPost) {

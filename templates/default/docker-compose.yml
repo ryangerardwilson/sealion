@@ -6,9 +6,9 @@ services:
       context: ./view/web
     environment:
       BACKEND_URL: http://backend:8080
-      PUBLIC_URL: "http://localhost:${SEALION_HTTP_PORT:-8080}"
+      PUBLIC_URL: "http://localhost:${CARBIDE_HTTP_PORT:-8080}"
     ports:
-      - "${SEALION_HTTP_PORT:-8080}:8080"
+      - "${CARBIDE_HTTP_PORT:-8080}:8080"
     depends_on:
       backend:
         condition: service_healthy
@@ -30,8 +30,8 @@ services:
       context: .
     environment:
       APP_PORT: "8080"
-      PUBLIC_URL: "http://localhost:${SEALION_HTTP_PORT:-8080}"
-      DATABASE_URL: postgres://sealion:sealion@db:5432/sealion
+      PUBLIC_URL: "http://localhost:${CARBIDE_HTTP_PORT:-8080}"
+      DATABASE_URL: postgres://carbide:carbide@db:5432/carbide
     expose:
       - "8080"
     depends_on:
@@ -55,16 +55,16 @@ services:
   db:
     image: postgres:16-alpine
     environment:
-      POSTGRES_DB: sealion
-      POSTGRES_USER: sealion
-      POSTGRES_PASSWORD: sealion
+      POSTGRES_DB: carbide
+      POSTGRES_USER: carbide
+      POSTGRES_PASSWORD: carbide
     volumes:
-      - sealion_pgdata:/var/lib/postgresql/data
+      - carbide_pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U sealion -d sealion"]
+      test: ["CMD-SHELL", "pg_isready -U carbide -d carbide"]
       interval: 3s
       timeout: 3s
       retries: 20
 
 volumes:
-  sealion_pgdata:
+  carbide_pgdata:

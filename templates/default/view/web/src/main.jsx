@@ -72,7 +72,7 @@ function AuthForm({ mode, onSubmit, busy, error, onMode }) {
       }}
     >
       <div>
-        <p className={eyebrowClass}>Sealion starter</p>
+        <p className={eyebrowClass}>Carbide starter</p>
         <h1 className="m-0 text-[34px] leading-tight text-[#16211b]">
           {isRegister ? 'Create the first account' : 'Log in to the dashboard'}
         </h1>
@@ -225,7 +225,7 @@ function App() {
     return (
       <main className="grid min-h-svh place-items-center px-8 text-center">
         <div>
-          <p className={eyebrowClass}>Sealion</p>
+          <p className={eyebrowClass}>Carbide</p>
           <h1 className="m-0 text-4xl leading-tight text-[#16211b]">Loading app state</h1>
         </div>
       </main>

@@ -5,29 +5,33 @@ repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." >/dev/null 2>&1 && pwd)"
 tmp_dir="$(mktemp -d)"
 trap 'rm -rf "$tmp_dir"' EXIT
 
-export SEALION_HOME="$repo_root"
+export CARBIDE_HOME="$repo_root"
 
-"$repo_root/bin/sealion" help > "$tmp_dir/help.out"
-grep -q "sealion help" "$tmp_dir/help.out"
-grep -q "sealion upgrade" "$tmp_dir/help.out"
-grep -q "sealion run dev" "$tmp_dir/help.out"
-grep -q "sealion status" "$tmp_dir/help.out"
-grep -q "sealion stop dev" "$tmp_dir/help.out"
-grep -q "sealion follow logs" "$tmp_dir/help.out"
-grep -q "sealion logs service backend" "$tmp_dir/help.out"
-! grep -q "sealion logs follow" "$tmp_dir/help.out"
-! grep -q "sealion format" "$tmp_dir/help.out"
+"$repo_root/bin/carbide" help > "$tmp_dir/help.out"
+grep -q "carbide help" "$tmp_dir/help.out"
+grep -q "carbide upgrade" "$tmp_dir/help.out"
+grep -q "carbide run dev" "$tmp_dir/help.out"
+grep -q "carbide status" "$tmp_dir/help.out"
+grep -q "carbide stop dev" "$tmp_dir/help.out"
+grep -q "carbide follow logs" "$tmp_dir/help.out"
+grep -q "carbide logs service backend" "$tmp_dir/help.out"
+! grep -q "carbide logs follow" "$tmp_dir/help.out"
+! grep -q "carbide format" "$tmp_dir/help.out"
 
-if "$repo_root/bin/sealion" format >/tmp/sealion-format.out 2>/tmp/sealion-format.err; then
-  printf 'sealion format should not exist\n' >&2
+if "$repo_root/bin/carbide" format >/tmp/carbide-format.out 2>/tmp/carbide-format.err; then
+  printf 'carbide format should not exist\n' >&2
   exit 1
 fi
-grep -q "unknown command: format" /tmp/sealion-format.err
+grep -q "unknown command: format" /tmp/carbide-format.err
+
+"$repo_root/bin/sealion" help > "$tmp_dir/legacy-help.out"
+grep -q "carbide help" "$tmp_dir/legacy-help.out"
+! grep -q "sealion help" "$tmp_dir/legacy-help.out"
 
 cd "$tmp_dir"
-"$repo_root/bin/sealion" new demo
+"$repo_root/bin/carbide" new demo
 
-test -f "$tmp_dir/demo/sealion.toml"
+test -f "$tmp_dir/demo/carbide.toml"
 test -f "$tmp_dir/demo/.gitignore"
 test -f "$tmp_dir/demo/docker-compose.yml"
 test -f "$tmp_dir/demo/Dockerfile"
@@ -56,16 +60,16 @@ test -f "$tmp_dir/demo/controller/page_controller.go"
 ! test -f "$tmp_dir/demo/controller/page_controller.c"
 test -f "$tmp_dir/demo/migrations/001_auth.sql"
 
-grep -q 'name = "demo"' "$tmp_dir/demo/sealion.toml"
-grep -q "default_port = 8080" "$tmp_dir/demo/sealion.toml"
-! grep -q 'url = "http://localhost:8080"' "$tmp_dir/demo/sealion.toml"
+grep -q 'name = "demo"' "$tmp_dir/demo/carbide.toml"
+grep -q "default_port = 8080" "$tmp_dir/demo/carbide.toml"
+! grep -q 'url = "http://localhost:8080"' "$tmp_dir/demo/carbide.toml"
 grep -q 'name: demo' "$tmp_dir/demo/docker-compose.yml"
-grep -q ".sealion/" "$tmp_dir/demo/.gitignore"
+grep -q ".carbide/" "$tmp_dir/demo/.gitignore"
 grep -q "frontend:" "$tmp_dir/demo/docker-compose.yml"
 grep -q "backend:" "$tmp_dir/demo/docker-compose.yml"
 grep -q "db:" "$tmp_dir/demo/docker-compose.yml"
-grep -q 'PUBLIC_URL: "http://localhost:${SEALION_HTTP_PORT:-8080}"' "$tmp_dir/demo/docker-compose.yml"
-test "$(grep -c 'PUBLIC_URL: "http://localhost:${SEALION_HTTP_PORT:-8080}"' "$tmp_dir/demo/docker-compose.yml")" -eq 2
+grep -q 'PUBLIC_URL: "http://localhost:${CARBIDE_HTTP_PORT:-8080}"' "$tmp_dir/demo/docker-compose.yml"
+test "$(grep -c 'PUBLIC_URL: "http://localhost:${CARBIDE_HTTP_PORT:-8080}"' "$tmp_dir/demo/docker-compose.yml")" -eq 2
 grep -q "develop:" "$tmp_dir/demo/docker-compose.yml"
 grep -q "watch:" "$tmp_dir/demo/docker-compose.yml"
 grep -q "action: rebuild" "$tmp_dir/demo/docker-compose.yml"
@@ -79,7 +83,7 @@ grep -q "path: ./src" "$tmp_dir/demo/docker-compose.yml"
 grep -q "path: ./model" "$tmp_dir/demo/docker-compose.yml"
 grep -q "path: ./controller" "$tmp_dir/demo/docker-compose.yml"
 grep -q "path: ./Dockerfile" "$tmp_dir/demo/docker-compose.yml"
-! grep -R 'admin@sealion.local' "$tmp_dir/demo" >/dev/null
+! grep -R 'admin@carbide.local' "$tmp_dir/demo" >/dev/null
 ! grep -R 'Demo login' "$tmp_dir/demo" >/dev/null
 grep -q "github.com/jackc/pgx/v5" "$tmp_dir/demo/go.mod"
 grep -q "package main" "$tmp_dir/demo/src/main.go"
@@ -113,18 +117,18 @@ grep -q "Containerized full stack development" "$tmp_dir/demo/view/web/src/main.
 
 mkdir "$tmp_dir/init-app"
 cd "$tmp_dir/init-app"
-"$repo_root/bin/sealion" init
-test -f "$tmp_dir/init-app/sealion.toml"
-grep -q 'name = "init-app"' "$tmp_dir/init-app/sealion.toml"
+"$repo_root/bin/carbide" init
+test -f "$tmp_dir/init-app/carbide.toml"
+grep -q 'name = "init-app"' "$tmp_dir/init-app/carbide.toml"
 
 mkdir "$tmp_dir/not-empty"
 touch "$tmp_dir/not-empty/file"
 cd "$tmp_dir/not-empty"
-if "$repo_root/bin/sealion" init >/tmp/sealion-init.out 2>/tmp/sealion-init.err; then
-  printf 'sealion init should fail in a non-empty directory\n' >&2
+if "$repo_root/bin/carbide" init >/tmp/carbide-init.out 2>/tmp/carbide-init.err; then
+  printf 'carbide init should fail in a non-empty directory\n' >&2
   exit 1
 fi
-grep -q "requires an empty directory" /tmp/sealion-init.err
+grep -q "requires an empty directory" /tmp/carbide-init.err
 
 if command -v python3 >/dev/null 2>&1; then
   fake_bin="$tmp_dir/fake-bin"
@@ -174,7 +178,7 @@ if [ "${1:-}" = "compose" ] && [ "${2:-}" = "ps" ] && [ "${3:-}" = "--format" ] 
 fi
 
 if [ "${1:-}" = "compose" ] && [ "${2:-}" = "up" ]; then
-  printf '%s\n' "${SEALION_HTTP_PORT:-}" > "$FAKE_DOCKER_PORT_FILE"
+  printf '%s\n' "${CARBIDE_HTTP_PORT:-}" > "$FAKE_DOCKER_PORT_FILE"
   printf '%s\n' "$*" > "$FAKE_DOCKER_ARGS_FILE"
   exit 0
 fi
@@ -230,8 +234,8 @@ PY
   sleep 0.5
 
   cd "$tmp_dir/demo"
-  PATH="$fake_bin:$PATH" FAKE_DOCKER_PORT_FILE="$port_file" FAKE_DOCKER_ARGS_FILE="$args_file" "$repo_root/bin/sealion" run dev > "$tmp_dir/run-dev.out"
-  grep -q "Sealion dev" "$tmp_dir/run-dev.out"
+  PATH="$fake_bin:$PATH" FAKE_DOCKER_PORT_FILE="$port_file" FAKE_DOCKER_ARGS_FILE="$args_file" "$repo_root/bin/carbide" run dev > "$tmp_dir/run-dev.out"
+  grep -q "Carbide dev" "$tmp_dir/run-dev.out"
   grep -Eq "^app[[:space:]]+http://localhost:" "$tmp_dir/run-dev.out"
   grep -Eq "^api[[:space:]]+http://localhost:" "$tmp_dir/run-dev.out"
   ! grep -Eq "^port[[:space:]]+" "$tmp_dir/run-dev.out"
@@ -247,16 +251,16 @@ PY
   grep -Eq "^[0-9]{2}:[0-9]{2}:[0-9]{2}[[:space:]]+backend[[:space:]]+GET /health" "$tmp_dir/run-dev.out"
   grep -Eq "^[0-9]{2}:[0-9]{2}:[0-9]{2}[[:space:]]+frontend[[:space:]]+listening on :8080" "$tmp_dir/run-dev.out"
   grep -Eq "^[0-9]{2}:[0-9]{2}:[0-9]{2}[[:space:]]+watch[[:space:]]+rebuilding backend" "$tmp_dir/run-dev.out"
-  test -f "$tmp_dir/demo/.sealion/log/dev.jsonl"
-  grep -q '"service":"backend"' "$tmp_dir/demo/.sealion/log/dev.jsonl"
-  grep -q '"message":"GET /health"' "$tmp_dir/demo/.sealion/log/dev.jsonl"
-  PATH="$fake_bin:$PATH" "$repo_root/bin/sealion" logs service backend > "$tmp_dir/logs-backend.out"
+  test -f "$tmp_dir/demo/.carbide/log/dev.jsonl"
+  grep -q '"service":"backend"' "$tmp_dir/demo/.carbide/log/dev.jsonl"
+  grep -q '"message":"GET /health"' "$tmp_dir/demo/.carbide/log/dev.jsonl"
+  PATH="$fake_bin:$PATH" "$repo_root/bin/carbide" logs service backend > "$tmp_dir/logs-backend.out"
   grep -Eq "^[0-9]{2}:[0-9]{2}:[0-9]{2}[[:space:]]+backend[[:space:]]+GET /health" "$tmp_dir/logs-backend.out"
-  PATH="$fake_bin:$PATH" "$repo_root/bin/sealion" logs json containing listening > "$tmp_dir/logs-json.out"
+  PATH="$fake_bin:$PATH" "$repo_root/bin/carbide" logs json containing listening > "$tmp_dir/logs-json.out"
   grep -q '"service":"frontend"' "$tmp_dir/logs-json.out"
   grep -q '"message":"listening on :8080"' "$tmp_dir/logs-json.out"
-  PATH="$fake_bin:$PATH" FAKE_DOCKER_PORT_FILE="$port_file" "$repo_root/bin/sealion" status > "$tmp_dir/status.out"
-  grep -q "Sealion status" "$tmp_dir/status.out"
+  PATH="$fake_bin:$PATH" FAKE_DOCKER_PORT_FILE="$port_file" "$repo_root/bin/carbide" status > "$tmp_dir/status.out"
+  grep -q "Carbide status" "$tmp_dir/status.out"
   grep -Eq "^service[[:space:]]+container[[:space:]]+ports[[:space:]]+internal[[:space:]]+status" "$tmp_dir/status.out"
   grep -Eq "^frontend[[:space:]]+demo-frontend-1[[:space:]]+localhost:[0-9]+[[:space:]]+8080/tcp[[:space:]]+running \\(healthy\\)" "$tmp_dir/status.out"
   grep -Eq "^backend[[:space:]]+demo-backend-1[[:space:]]+-[[:space:]]+8080/tcp[[:space:]]+running \\(healthy\\)" "$tmp_dir/status.out"
@@ -266,27 +270,27 @@ PY
   grep -q "compose logs -f --tail 80 --no-color" "$args_file"
   grep -q "compose watch --no-up --quiet" "$args_file"
   ! grep -q "compose down" "$args_file"
-  PATH="$fake_bin:$PATH" FAKE_DOCKER_ARGS_FILE="$args_file" "$repo_root/bin/sealion" stop dev > "$tmp_dir/stop-dev.out"
-  grep -q "Sealion stop dev" "$tmp_dir/stop-dev.out"
+  PATH="$fake_bin:$PATH" FAKE_DOCKER_ARGS_FILE="$args_file" "$repo_root/bin/carbide" stop dev > "$tmp_dir/stop-dev.out"
+  grep -q "Carbide stop dev" "$tmp_dir/stop-dev.out"
   grep -Eq "^dev[[:space:]]+stopped" "$tmp_dir/stop-dev.out"
   grep -q "compose down --remove-orphans" "$args_file"
-  PATH="$fake_bin:$PATH" FAKE_DOCKER_ARGS_FILE="$args_file" "$repo_root/bin/sealion" follow logs service backend > "$tmp_dir/logs-follow.out"
+  PATH="$fake_bin:$PATH" FAKE_DOCKER_ARGS_FILE="$args_file" "$repo_root/bin/carbide" follow logs service backend > "$tmp_dir/logs-follow.out"
   grep -Eq "^[0-9]{2}:[0-9]{2}:[0-9]{2}[[:space:]]+backend[[:space:]]+GET /health" "$tmp_dir/logs-follow.out"
   ! grep -q "frontend" "$tmp_dir/logs-follow.out"
   selected_port="$(cat "$port_file")"
   if [ "$selected_port" = "8080" ]; then
-    printf 'sealion run dev should not select occupied port 8080\n' >&2
+    printf 'carbide run dev should not select occupied port 8080\n' >&2
     exit 1
   fi
 
-  if PATH="$fake_bin:$PATH" FAKE_DOCKER_PORT_FILE="$port_file" FAKE_DOCKER_ARGS_FILE="$args_file" SEALION_HTTP_PORT=8080 "$repo_root/bin/sealion" run dev > "$tmp_dir/explicit-port.out" 2> "$tmp_dir/explicit-port.err"; then
-    printf 'explicit occupied SEALION_HTTP_PORT should fail before compose starts\n' >&2
+  if PATH="$fake_bin:$PATH" FAKE_DOCKER_PORT_FILE="$port_file" FAKE_DOCKER_ARGS_FILE="$args_file" CARBIDE_HTTP_PORT=8080 "$repo_root/bin/carbide" run dev > "$tmp_dir/explicit-port.out" 2> "$tmp_dir/explicit-port.err"; then
+    printf 'explicit occupied CARBIDE_HTTP_PORT should fail before compose starts\n' >&2
     exit 1
   fi
   grep -q "port 8080 is already in use" "$tmp_dir/explicit-port.err"
 
   : > "$args_file"
-  PATH="$fake_bin:$PATH" FAKE_DOCKER_STREAM_LONG=1 FAKE_DOCKER_PORT_FILE="$port_file" FAKE_DOCKER_ARGS_FILE="$args_file" "$repo_root/bin/sealion" run dev > "$tmp_dir/run-dev-detach.out" &
+  PATH="$fake_bin:$PATH" FAKE_DOCKER_STREAM_LONG=1 FAKE_DOCKER_PORT_FILE="$port_file" FAKE_DOCKER_ARGS_FILE="$args_file" "$repo_root/bin/carbide" run dev > "$tmp_dir/run-dev-detach.out" &
   run_dev_pid="$!"
   for _ in $(seq 1 50); do
     if grep -q "GET /health" "$tmp_dir/run-dev-detach.out" 2>/dev/null; then
@@ -298,45 +302,46 @@ PY
   wait "$run_dev_pid"
   grep -Eq "^logs[[:space:]]+detached" "$tmp_dir/run-dev-detach.out"
   grep -Eq "^dev[[:space:]]+running" "$tmp_dir/run-dev-detach.out"
-  grep -Eq "^follow[[:space:]]+sealion follow logs" "$tmp_dir/run-dev-detach.out"
-  grep -Eq "^stop[[:space:]]+sealion stop dev" "$tmp_dir/run-dev-detach.out"
+  grep -Eq "^follow[[:space:]]+carbide follow logs" "$tmp_dir/run-dev-detach.out"
+  grep -Eq "^stop[[:space:]]+carbide stop dev" "$tmp_dir/run-dev-detach.out"
   ! grep -q "compose down" "$args_file"
 
   kill "$listener_pid" >/dev/null 2>&1 || true
 fi
 
-remote_repo="$tmp_dir/sealion-origin.git"
-installed_repo="$tmp_dir/installed-sealion"
+remote_repo="$tmp_dir/carbide-origin.git"
+installed_repo="$tmp_dir/installed-carbide"
 upgrade_work="$tmp_dir/upgrade-work"
 
 git init --bare "$remote_repo" >/dev/null
 git init "$installed_repo" >/dev/null
 mkdir -p "$installed_repo/bin"
-cp "$repo_root/bin/sealion" "$installed_repo/bin/sealion"
+cp "$repo_root/bin/carbide" "$installed_repo/bin/carbide"
 cp "$repo_root/.gitignore" "$installed_repo/.gitignore"
 cp "$repo_root/go.mod" "$installed_repo/go.mod"
 cp -R "$repo_root/cmd" "$installed_repo/cmd"
-git -C "$installed_repo" add .gitignore bin/sealion
-git -C "$installed_repo" add go.mod cmd
-git -C "$installed_repo" -c user.name="Sealion Test" -c user.email="test@sealion.local" commit -m "Initial install" >/dev/null
+cp -R "$repo_root/internal" "$installed_repo/internal"
+git -C "$installed_repo" add .gitignore bin/carbide
+git -C "$installed_repo" add go.mod cmd internal
+git -C "$installed_repo" -c user.name="Carbide Test" -c user.email="test@carbide.local" commit -m "Initial install" >/dev/null
 git -C "$installed_repo" branch -M main
 git -C "$installed_repo" remote add origin "$remote_repo"
 git -C "$installed_repo" push -u origin main >/dev/null
 git --git-dir="$remote_repo" symbolic-ref HEAD refs/heads/main
 
-SEALION_HOME="$installed_repo" "$repo_root/bin/sealion" upgrade > "$tmp_dir/upgrade-current.out"
-grep -q "Sealion upgrade" "$tmp_dir/upgrade-current.out"
+CARBIDE_HOME="$installed_repo" "$repo_root/bin/carbide" upgrade > "$tmp_dir/upgrade-current.out"
+grep -q "Carbide upgrade" "$tmp_dir/upgrade-current.out"
 grep -Eq "^status[[:space:]]+up to date" "$tmp_dir/upgrade-current.out"
 
 git clone --branch main "$remote_repo" "$upgrade_work" >/dev/null
 printf '# changed\n' >> "$upgrade_work/README.md"
 git -C "$upgrade_work" add README.md
-git -C "$upgrade_work" -c user.name="Sealion Test" -c user.email="test@sealion.local" commit -m "Remote update" >/dev/null
+git -C "$upgrade_work" -c user.name="Carbide Test" -c user.email="test@carbide.local" commit -m "Remote update" >/dev/null
 git -C "$upgrade_work" push >/dev/null
 
-SEALION_HOME="$installed_repo" "$repo_root/bin/sealion" upgrade > "$tmp_dir/upgrade-new.out"
-grep -q "Sealion upgrade" "$tmp_dir/upgrade-new.out"
+CARBIDE_HOME="$installed_repo" "$repo_root/bin/carbide" upgrade > "$tmp_dir/upgrade-new.out"
+grep -q "Carbide upgrade" "$tmp_dir/upgrade-new.out"
 grep -Eq "^status[[:space:]]+upgraded" "$tmp_dir/upgrade-new.out"
-test -x "$installed_repo/.bin/sealion"
+test -x "$installed_repo/.bin/carbide"
 
 printf 'cli scaffold ok\n'

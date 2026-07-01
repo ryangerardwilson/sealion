@@ -12,8 +12,8 @@ import (
 	"syscall"
 	"time"
 
-	"sealionapp/controller"
-	"sealionapp/model"
+	"carbideapp/controller"
+	"carbideapp/model"
 )
 
 const appName = "__PROJECT_NAME__"

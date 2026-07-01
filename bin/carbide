@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+resolve_script_dir() {
+  local source dir
+  source="${BASH_SOURCE[0]}"
+  while [ -L "$source" ]; do
+    dir="$(cd -P "$(dirname "$source")" >/dev/null 2>&1 && pwd)"
+    source="$(readlink "$source")"
+    case "$source" in
+      /*) ;;
+      *) source="$dir/$source" ;;
+    esac
+  done
+  cd -P "$(dirname "$source")" >/dev/null 2>&1 && pwd
+}
+
+CARBIDE_HOME="${CARBIDE_HOME:-$(cd "$(resolve_script_dir)/.." >/dev/null 2>&1 && pwd)}"
+export CARBIDE_HOME
+
+command -v go >/dev/null 2>&1 || {
+  printf 'carbide: Go is required to run the development CLI from source\n' >&2
+  exit 1
+}
+
+mkdir -p "$CARBIDE_HOME/.bin"
+commit=""
+if command -v git >/dev/null 2>&1 && [ -d "$CARBIDE_HOME/.git" ]; then
+  commit="$(git -C "$CARBIDE_HOME" rev-parse --short HEAD 2>/dev/null || true)"
+fi
+
+(
+  cd "$CARBIDE_HOME"
+  go build -ldflags "-X github.com/ryangerardwilson/carbide/internal/carbide.commit=$commit" -o "$CARBIDE_HOME/.bin/carbide-dev" ./cmd/carbide
+)
+
+exec "$CARBIDE_HOME/.bin/carbide-dev" "$@"

@@ -15,23 +15,7 @@ resolve_script_dir() {
   cd -P "$(dirname "$source")" >/dev/null 2>&1 && pwd
 }
 
-SEALION_HOME="${SEALION_HOME:-$(cd "$(resolve_script_dir)/.." >/dev/null 2>&1 && pwd)}"
-export SEALION_HOME
+CARBIDE_HOME="${CARBIDE_HOME:-${SEALION_HOME:-$(cd "$(resolve_script_dir)/.." >/dev/null 2>&1 && pwd)}}"
+export CARBIDE_HOME
 
-command -v go >/dev/null 2>&1 || {
-  printf 'sealion: Go is required to run the development CLI from source\n' >&2
-  exit 1
-}
-
-mkdir -p "$SEALION_HOME/.bin"
-commit=""
-if command -v git >/dev/null 2>&1 && [ -d "$SEALION_HOME/.git" ]; then
-  commit="$(git -C "$SEALION_HOME" rev-parse --short HEAD 2>/dev/null || true)"
-fi
-
-(
-  cd "$SEALION_HOME"
-  go build -ldflags "-X main.commit=$commit" -o "$SEALION_HOME/.bin/sealion-dev" ./cmd/sealion
-)
-
-exec "$SEALION_HOME/.bin/sealion-dev" "$@"
+exec "$CARBIDE_HOME/bin/carbide" "$@"

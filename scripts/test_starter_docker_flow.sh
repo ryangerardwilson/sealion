@@ -9,7 +9,7 @@ cleanup() {
   if [ -n "$port" ] && [ -d "$tmp_dir/demo" ]; then
     (
       cd "$tmp_dir/demo"
-      SEALION_HTTP_PORT="$port" docker compose down -v --remove-orphans >/dev/null 2>&1 || true
+      CARBIDE_HTTP_PORT="$port" docker compose down -v --remove-orphans >/dev/null 2>&1 || true
     )
   fi
   rm -rf "$tmp_dir"
@@ -50,9 +50,9 @@ sys.exit(1)
 PY
 )"
 
-export SEALION_HOME="$repo_root"
+export CARBIDE_HOME="$repo_root"
 cd "$tmp_dir"
-"$repo_root/bin/sealion" new demo >/dev/null
+"$repo_root/bin/carbide" new demo >/dev/null
 
 cd "$tmp_dir/demo"
 docker compose config > "$tmp_dir/compose.config"
@@ -68,7 +68,7 @@ grep -q "/src" "$tmp_dir/compose.config"
 grep -q "/model" "$tmp_dir/compose.config"
 grep -q "/controller" "$tmp_dir/compose.config"
 grep -q "/Dockerfile" "$tmp_dir/compose.config"
-SEALION_HTTP_PORT="$port" docker compose up -d --build
+CARBIDE_HTTP_PORT="$port" docker compose up -d --build
 
 for _ in $(seq 1 60); do
   if curl -fsS "http://localhost:$port/health" >/dev/null 2>&1; then
@@ -87,12 +87,12 @@ docker compose logs backend > "$tmp_dir/backend.log"
 grep -q "backend listening on container port 8080" "$tmp_dir/backend.log"
 grep -q "public API URL is http://localhost:$port/api" "$tmp_dir/backend.log"
 docker compose logs frontend > "$tmp_dir/frontend.log"
-grep -q "Sealion Bun frontend listening inside container on :8080" "$tmp_dir/frontend.log"
+grep -q "Carbide Bun frontend listening inside container on :8080" "$tmp_dir/frontend.log"
 grep -q "browser entrypoint http://localhost:$port" "$tmp_dir/frontend.log"
 grep -q "proxying /api and /health to backend service http://backend:8080" "$tmp_dir/frontend.log"
 ! grep -q "Bun frontend listening on http://localhost:8080" "$tmp_dir/frontend.log"
-SEALION_HOME="$repo_root" "$repo_root/bin/sealion" status > "$tmp_dir/status.out"
-grep -q "Sealion status" "$tmp_dir/status.out"
+CARBIDE_HOME="$repo_root" "$repo_root/bin/carbide" status > "$tmp_dir/status.out"
+grep -q "Carbide status" "$tmp_dir/status.out"
 grep -Eq "^service[[:space:]]+container[[:space:]]+ports[[:space:]]+internal[[:space:]]+status" "$tmp_dir/status.out"
 grep -Eq "^frontend[[:space:]]+demo-frontend-1[[:space:]]+localhost:$port[[:space:]]+8080/tcp[[:space:]]+running" "$tmp_dir/status.out"
 grep -Eq "^backend[[:space:]]+demo-backend-1[[:space:]]+-[[:space:]]+8080/tcp[[:space:]]+running \\(healthy\\)" "$tmp_dir/status.out"
@@ -120,7 +120,7 @@ curl \
   --max-time 5 \
   -D "$tmp_dir/login-before-register.headers" \
   -o "$tmp_dir/login-before-register.json" \
-  -d "email=first%40sealion.local&password=password" \
+  -d "email=first%40carbide.local&password=password" \
   "http://localhost:$port/api/login"
 grep -q "422 Unprocessable Entity" "$tmp_dir/login-before-register.headers"
 grep -q '"ok":false' "$tmp_dir/login-before-register.json"
@@ -131,19 +131,19 @@ curl \
   -D "$tmp_dir/register.headers" \
   -o "$tmp_dir/register.json" \
   -c "$tmp_dir/cookies" \
-  -d "email=first%40sealion.local&password=password" \
+  -d "email=first%40carbide.local&password=password" \
   "http://localhost:$port/api/register"
 wait "$idle_pid" || true
 
 grep -q "200 OK" "$tmp_dir/register.headers"
 grep -qi "content-type: application/json" "$tmp_dir/register.headers"
 grep -qi "cache-control: no-store" "$tmp_dir/register.headers"
-grep -qi "set-cookie: sealion_session=" "$tmp_dir/register.headers"
-grep -q "sealion_session" "$tmp_dir/cookies"
+grep -qi "set-cookie: carbide_session=" "$tmp_dir/register.headers"
+grep -q "carbide_session" "$tmp_dir/cookies"
 grep -q '"ok":true' "$tmp_dir/register.json"
-grep -q 'first@sealion.local' "$tmp_dir/register.json"
+grep -q 'first@carbide.local' "$tmp_dir/register.json"
 
-session_token="$(awk '$6 == "sealion_session" {print $7}' "$tmp_dir/cookies" | tail -n 1)"
+session_token="$(awk '$6 == "carbide_session" {print $7}' "$tmp_dir/cookies" | tail -n 1)"
 long_cookie="$(
   python3 - <<'PY'
 print("x" * 5000)
@@ -151,14 +151,14 @@ PY
 )"
 curl \
   -fsS \
-  -H "Cookie: unrelated=${long_cookie}; sealion_session=${session_token}" \
+  -H "Cookie: unrelated=${long_cookie}; carbide_session=${session_token}" \
   "http://localhost:$port/api/dashboard" > "$tmp_dir/dashboard-long-cookie.json"
 grep -q '"ok":true' "$tmp_dir/dashboard-long-cookie.json"
-grep -q 'first@sealion.local' "$tmp_dir/dashboard-long-cookie.json"
+grep -q 'first@carbide.local' "$tmp_dir/dashboard-long-cookie.json"
 
 curl -fsS -b "$tmp_dir/cookies" "http://localhost:$port/api/me" > "$tmp_dir/me-auth.json"
 grep -q '"authenticated":true' "$tmp_dir/me-auth.json"
-grep -q 'first@sealion.local' "$tmp_dir/me-auth.json"
+grep -q 'first@carbide.local' "$tmp_dir/me-auth.json"
 
 curl -fsS -b "$tmp_dir/cookies" "http://localhost:$port/dashboard" > "$tmp_dir/dashboard-shell.html"
 grep -q '<div id="root"></div>' "$tmp_dir/dashboard-shell.html"
@@ -175,11 +175,11 @@ curl \
   -D "$tmp_dir/login.headers" \
   -o "$tmp_dir/login.json" \
   -c "$tmp_dir/cookies-after-login" \
-  -d "email=first%40sealion.local&password=password" \
+  -d "email=first%40carbide.local&password=password" \
   "http://localhost:$port/api/login"
 grep -q "200 OK" "$tmp_dir/login.headers"
-grep -qi "set-cookie: sealion_session=" "$tmp_dir/login.headers"
+grep -qi "set-cookie: carbide_session=" "$tmp_dir/login.headers"
 grep -q '"ok":true' "$tmp_dir/login.json"
-grep -q 'first@sealion.local' "$tmp_dir/login.json"
+grep -q 'first@carbide.local' "$tmp_dir/login.json"
 
 printf 'starter docker flow ok\n'

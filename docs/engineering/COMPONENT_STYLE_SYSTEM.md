@@ -1,16 +1,16 @@
 # Frontend Contract
 
-Sealion's default app uses a Bun/React/Tailwind frontend, Go API backend, and
+Carbide's default app uses a Bun/React/Tailwind frontend, Go API backend, and
 Postgres database. The frontend is a mandatory Bun container in the default
 local topology, not a host-installed JavaScript tooling requirement.
 
 ## Product Decision
 
-The default Sealion UI should be React served by Bun, not a custom Blade-like
+The default Carbide UI should be React served by Bun, not a custom Blade-like
 template system.
 
 This keeps frontend authoring inside a mature ecosystem while preserving the
-core Sealion bet: Go owns backend logic, auth, sessions, database access, and
+core Carbide bet: Go owns backend logic, auth, sessions, database access, and
 the framework runtime contract.
 
 ## Runtime Model

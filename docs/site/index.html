@@ -3,22 +3,22 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Sealion Documentation</title>
-    <meta name="description" content="Sealion is an experimental Laravel-inspired framework with Bun, React, Tailwind, Go, and Postgres containers.">
+    <title>Carbide Documentation</title>
+    <meta name="description" content="Carbide is an experimental Laravel-inspired framework with Bun, React, Tailwind, Go, and Postgres containers.">
     <link rel="stylesheet" href="assets/styles.css">
   </head>
   <body>
     <header class="hero">
       <div class="shell">
-        <p class="eyebrow">Sealion docs</p>
+        <p class="eyebrow">Carbide docs</p>
         <h1>Bun frontend. Go API backend. Postgres database.</h1>
-        <p class="lead">Sealion starts with three mandatory containers, checked-in infrastructure, and regression tests that protect the framework before it grows.</p>
+        <p class="lead">Carbide starts with three mandatory containers, checked-in infrastructure, and regression tests that protect the framework before it grows.</p>
         <nav class="nav" aria-label="Documentation">
           <a href="initial-user-experience.html">Initial user experience</a>
           <a href="component-style-system.html">Frontend contract</a>
           <a href="ci-cd-regression-tests.html">CI/CD regression plan</a>
           <a href="repo-structure.html">Directory structure</a>
-          <a href="https://github.com/ryangerardwilson/sealion">GitHub</a>
+          <a href="https://github.com/ryangerardwilson/carbide">GitHub</a>
         </nav>
       </div>
     </header>
@@ -27,12 +27,12 @@
       <div>
         <section>
           <h2>Install And Start</h2>
-          <pre><code>curl -fsSL https://raw.githubusercontent.com/ryangerardwilson/sealion/main/install.sh | bash
-sealion new demo
+          <pre><code>curl -fsSL https://raw.githubusercontent.com/ryangerardwilson/carbide/main/install.sh | bash
+carbide new demo
 cd demo
-sealion run dev
-sealion status</code></pre>
-          <p>The installer builds the Go CLI. <code>sealion help</code> prints the command reference. <code>sealion upgrade</code> updates the installed CLI when a newer GitHub commit is available. <code>Ctrl+C</code> detaches from live dev logs; <code>sealion follow logs</code> attaches again; <code>sealion status</code> prints the container table; <code>sealion stop dev</code> stops the stack.</p>
+carbide run dev
+carbide status</code></pre>
+          <p>The installer builds the Go CLI. <code>carbide help</code> prints the command reference. <code>carbide upgrade</code> updates the installed CLI when a newer GitHub commit is available. <code>Ctrl+C</code> detaches from live dev logs; <code>carbide follow logs</code> attaches again; <code>carbide status</code> prints the container table; <code>carbide stop dev</code> stops the stack.</p>
         </section>
 
         <section>
@@ -65,7 +65,7 @@ sealion status</code></pre>
         </section>
       </div>
 
-      <aside class="system-map" aria-label="Sealion runtime map">
+      <aside class="system-map" aria-label="Carbide runtime map">
         <div class="node">
           <strong>Repository</strong>
           <p class="meta">README, docs, workflows, scripts, source, tests, UI contracts, and infrastructure contracts.</p>
@@ -78,13 +78,13 @@ sealion status</code></pre>
         <div class="arrow">down</div>
         <div class="node">
           <strong>GitHub Pages</strong>
-          <p class="meta">Published at <code>sealion.ryangerardwilson.com</code>.</p>
+          <p class="meta">Published at <code>carbide.ryangerardwilson.com</code>.</p>
         </div>
       </aside>
     </main>
 
     <footer class="footer">
-      <div class="shell">Sealion documentation is published from the public GitHub repository.</div>
+      <div class="shell">Carbide documentation is published from the public GitHub repository.</div>
     </footer>
   </body>
 </html>

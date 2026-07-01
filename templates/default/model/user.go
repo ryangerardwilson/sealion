@@ -27,7 +27,7 @@ type User struct {
 func Connect(ctx context.Context) (*Store, error) {
 	databaseURL := os.Getenv("DATABASE_URL")
 	if databaseURL == "" {
-		databaseURL = "postgres://sealion:sealion@localhost:5432/sealion"
+		databaseURL = "postgres://carbide:carbide@localhost:5432/carbide"
 	}
 
 	var lastErr error

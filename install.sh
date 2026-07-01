@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-repo_url="${SEALION_REPO_URL:-https://github.com/ryangerardwilson/sealion.git}"
-archive_url="${SEALION_ARCHIVE_URL:-https://github.com/ryangerardwilson/sealion/archive/refs/heads/main.tar.gz}"
-install_dir="${SEALION_HOME:-$HOME/.sealion}"
-bin_dir="${SEALION_BIN_DIR:-$HOME/.local/bin}"
+repo_url="${CARBIDE_REPO_URL:-${SEALION_REPO_URL:-https://github.com/ryangerardwilson/carbide.git}}"
+archive_url="${CARBIDE_ARCHIVE_URL:-${SEALION_ARCHIVE_URL:-https://github.com/ryangerardwilson/carbide/archive/refs/heads/main.tar.gz}}"
+install_dir="${CARBIDE_HOME:-${SEALION_HOME:-$HOME/.carbide}}"
+bin_dir="${CARBIDE_BIN_DIR:-${SEALION_BIN_DIR:-$HOME/.local/bin}}"
 
 command -v go >/dev/null 2>&1 || {
-  printf 'install failed: Go is required to build the Sealion CLI\n' >&2
+  printf 'install failed: Go is required to build the Carbide CLI\n' >&2
   exit 1
 }
 
@@ -43,18 +43,21 @@ commit=""
 if [ -d "$install_dir/.git" ] && command -v git >/dev/null 2>&1; then
   commit="$(git -C "$install_dir" rev-parse --short HEAD 2>/dev/null || true)"
 fi
-tmp_bin="$build_dir/sealion.$$"
+tmp_bin="$build_dir/carbide.$$"
 (
   cd "$install_dir"
-  go build -ldflags "-X main.commit=$commit" -o "$tmp_bin" ./cmd/sealion
+  go build -ldflags "-X github.com/ryangerardwilson/carbide/internal/carbide.commit=$commit" -o "$tmp_bin" ./cmd/carbide
 )
-mv "$tmp_bin" "$build_dir/sealion"
-chmod +x "$build_dir/sealion"
-chmod +x "$install_dir/bin/sealion"
-ln -sfn "$build_dir/sealion" "$bin_dir/sealion"
+mv "$tmp_bin" "$build_dir/carbide"
+chmod +x "$build_dir/carbide"
+chmod +x "$install_dir/bin/carbide"
+ln -sfn "$build_dir/carbide" "$bin_dir/carbide"
+if [ -L "$bin_dir/sealion" ]; then
+  rm -f "$bin_dir/sealion"
+fi
 
-printf 'installed sealion to %s\n' "$bin_dir/sealion"
+printf 'installed carbide to %s\n' "$bin_dir/carbide"
 case ":$PATH:" in
   *":$bin_dir:"*) ;;
-  *) printf 'add %s to PATH if sealion is not found\n' "$bin_dir" ;;
+  *) printf 'add %s to PATH if carbide is not found\n' "$bin_dir" ;;
 esac

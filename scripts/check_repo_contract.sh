@@ -1,16 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-domain="sealion.ryangerardwilson.com"
+domain="carbide.ryangerardwilson.com"
 
 required_files=(
   ".gitignore"
   "README.md"
   "install.sh"
   "go.mod"
+  "bin/carbide"
   "bin/sealion"
+  "cmd/carbide/main.go"
   "cmd/sealion/main.go"
-  "cmd/sealion/main_test.go"
+  "internal/carbide/cli.go"
+  "internal/carbide/cli_test.go"
   ".github/workflows/ci.yml"
   ".github/workflows/pages.yml"
   "docs/engineering/CI_CD_REGRESSION_TESTS.md"
@@ -36,7 +39,7 @@ required_files=(
   "templates/default/view/web/src/main.jsx"
   "templates/default/view/web/src/server.jsx"
   "templates/default/view/web/src/styles.css"
-  "templates/default/sealion.toml"
+  "templates/default/carbide.toml"
   "templates/default/go.mod"
   "templates/default/go.sum"
   "templates/default/src/main.go"
@@ -49,11 +52,13 @@ required_files=(
 
 required_dirs=(
   "cmd"
+  "cmd/carbide"
   "cmd/sealion"
+  "internal/carbide"
   "src"
   "src/ui"
-  "include/sealion"
-  "include/sealion/ui"
+  "include/carbide"
+  "include/carbide/ui"
   "tests/unit"
   "tests/integration"
   "tests/regression"
@@ -96,30 +101,32 @@ grep -q "Separate runtime boundaries" README.md
 grep -q "Infrastructure as code" README.md
 grep -q "generated Docker Compose setup" README.md
 grep -q "Postgres-backed queues" README.md
-grep -q "sealion new" README.md
-grep -q "sealion run dev" README.md
-grep -q "sealion status" README.md
-grep -q "sealion stop dev" README.md
-grep -q "sealion follow logs" README.md
-grep -q "sealion logs" README.md
-! grep -q "command_format" bin/sealion
-! grep -q "sealion format" bin/sealion
-grep -q "module github.com/ryangerardwilson/sealion" go.mod
+grep -q "carbide new" README.md
+grep -q "carbide run dev" README.md
+grep -q "carbide status" README.md
+grep -q "carbide stop dev" README.md
+grep -q "carbide follow logs" README.md
+grep -q "carbide logs" README.md
+! grep -q "command_format" bin/carbide
+! grep -q "carbide format" bin/carbide
+grep -q "module github.com/ryangerardwilson/carbide" go.mod
+grep -q "package main" cmd/carbide/main.go
 grep -q "package main" cmd/sealion/main.go
-grep -q "composeUpDetached" cmd/sealion/main.go
-grep -q "runDevStreams" cmd/sealion/main.go
-grep -q -- "--quiet-build" cmd/sealion/main.go
-grep -q "Sealion dev" cmd/sealion/main.go
-grep -q "Go is required to build the Sealion CLI" install.sh
-grep -q ".bin/sealion" install.sh
-grep -q "default_port = 8080" templates/default/sealion.toml
-grep -q ".sealion/" templates/default/.gitignore
-! grep -q 'url = "http://localhost:8080"' templates/default/sealion.toml
+grep -q "package carbide" internal/carbide/cli.go
+grep -q "composeUpDetached" internal/carbide/cli.go
+grep -q "runDevStreams" internal/carbide/cli.go
+grep -q -- "--quiet-build" internal/carbide/cli.go
+grep -q "Carbide dev" internal/carbide/cli.go
+grep -q "Go is required to build the Carbide CLI" install.sh
+grep -q ".bin/carbide" install.sh
+grep -q "default_port = 8080" templates/default/carbide.toml
+grep -q ".carbide/" templates/default/.gitignore
+! grep -q 'url = "http://localhost:8080"' templates/default/carbide.toml
 grep -q "frontend:" templates/default/docker-compose.yml
 grep -q "backend:" templates/default/docker-compose.yml
 grep -q "db:" templates/default/docker-compose.yml
-grep -q 'PUBLIC_URL: "http://localhost:${SEALION_HTTP_PORT:-8080}"' templates/default/docker-compose.yml
-test "$(grep -c 'PUBLIC_URL: "http://localhost:${SEALION_HTTP_PORT:-8080}"' templates/default/docker-compose.yml)" -eq 2
+grep -q 'PUBLIC_URL: "http://localhost:${CARBIDE_HTTP_PORT:-8080}"' templates/default/docker-compose.yml
+test "$(grep -c 'PUBLIC_URL: "http://localhost:${CARBIDE_HTTP_PORT:-8080}"' templates/default/docker-compose.yml)" -eq 2
 grep -q "develop:" templates/default/docker-compose.yml
 grep -q "watch:" templates/default/docker-compose.yml
 grep -q "action: rebuild" templates/default/docker-compose.yml
@@ -166,7 +173,7 @@ grep -q "/api/me" templates/default/controller/page_controller.go
 grep -q "handleDashboard" templates/default/controller/page_controller.go
 grep -q "CreateUser" templates/default/model/user.go
 grep -q "CreateSession" templates/default/model/session.go
-! grep -R "admin@sealion.local" templates/default README.md docs >/dev/null
+! grep -R "admin@carbide.local" templates/default README.md docs >/dev/null
 ! grep -R "Demo login" templates/default README.md docs >/dev/null
 ! find templates/default -name '*.c' -o -name '*.h' | grep -q .
 ! grep -R "seed_admin" templates/default >/dev/null
@@ -178,42 +185,42 @@ grep -q "backend listening on container port" templates/default/src/main.go
 grep -q "public API URL is" templates/default/src/main.go
 ! grep -q "API listening inside backend container" templates/default/src/main.go
 ! grep -q "frontend proxies API calls" templates/default/src/main.go
-grep -q "compose.supports(\"--watch\")" cmd/sealion/main.go
-grep -q "newRenderer" cmd/sealion/main.go
-grep -q "func (r renderer) Table" cmd/sealion/main.go
-grep -q "runDevStreams" cmd/sealion/main.go
-grep -q "commandStatus" cmd/sealion/main.go
-grep -q "commandStopDev" cmd/sealion/main.go
-grep -q "RunServiceProgress" cmd/sealion/main.go
-grep -q "RunServiceStopProgress" cmd/sealion/main.go
-grep -q "serviceProgressFrameWidth" cmd/sealion/main.go
-grep -q "serviceProgressFrame" cmd/sealion/main.go
-grep -q "terminalColumns" cmd/sealion/main.go
-grep -q "composeServiceStatuses" cmd/sealion/main.go
-grep -q "composeServiceSnapshots" cmd/sealion/main.go
-grep -q "composePublishedPorts" cmd/sealion/main.go
-grep -q "composeInternalPorts" cmd/sealion/main.go
-grep -q "streamLogOutput" cmd/sealion/main.go
-grep -q "parseComposeLogLine" cmd/sealion/main.go
-grep -q "composeLogsArgs" cmd/sealion/main.go
-grep -q "openDevLogSink" cmd/sealion/main.go
-grep -q "openAppendDevLogSink" cmd/sealion/main.go
-grep -q "commandLogs" cmd/sealion/main.go
-grep -q "commandFollowLogs" cmd/sealion/main.go
-grep -q ".sealion/log/dev.jsonl" cmd/sealion/main.go
-grep -q "sealion follow logs" cmd/sealion/main.go
-grep -q "sealion status" cmd/sealion/main.go
-! grep -q "sealion logs follow" cmd/sealion/main.go
-! grep -q 'outputRow{"login"' cmd/sealion/main.go
-! grep -q 'outputRow{"mode"' cmd/sealion/main.go
+grep -q "compose.supports(\"--watch\")" internal/carbide/cli.go
+grep -q "newRenderer" internal/carbide/cli.go
+grep -q "func (r renderer) Table" internal/carbide/cli.go
+grep -q "runDevStreams" internal/carbide/cli.go
+grep -q "commandStatus" internal/carbide/cli.go
+grep -q "commandStopDev" internal/carbide/cli.go
+grep -q "RunServiceProgress" internal/carbide/cli.go
+grep -q "RunServiceStopProgress" internal/carbide/cli.go
+grep -q "serviceProgressFrameWidth" internal/carbide/cli.go
+grep -q "serviceProgressFrame" internal/carbide/cli.go
+grep -q "terminalColumns" internal/carbide/cli.go
+grep -q "composeServiceStatuses" internal/carbide/cli.go
+grep -q "composeServiceSnapshots" internal/carbide/cli.go
+grep -q "composePublishedPorts" internal/carbide/cli.go
+grep -q "composeInternalPorts" internal/carbide/cli.go
+grep -q "streamLogOutput" internal/carbide/cli.go
+grep -q "parseComposeLogLine" internal/carbide/cli.go
+grep -q "composeLogsArgs" internal/carbide/cli.go
+grep -q "openDevLogSink" internal/carbide/cli.go
+grep -q "openAppendDevLogSink" internal/carbide/cli.go
+grep -q "commandLogs" internal/carbide/cli.go
+grep -q "commandFollowLogs" internal/carbide/cli.go
+grep -q ".carbide/log/dev.jsonl" internal/carbide/cli.go
+grep -q "carbide follow logs" internal/carbide/cli.go
+grep -q "carbide status" internal/carbide/cli.go
+! grep -q "carbide logs follow" internal/carbide/cli.go
+! grep -q 'outputRow{"login"' internal/carbide/cli.go
+! grep -q 'outputRow{"mode"' internal/carbide/cli.go
 
 grep -q "$domain" docs/site/index.html
 grep -q "Bun frontend" docs/site/index.html
 grep -q "Initial user experience" docs/site/index.html
 grep -q "Bun frontend, Go API backend, Postgres database" docs/site/component-style-system.html
 grep -q "Tailwind is required" docs/site/component-style-system.html
-grep -q "sealion follow logs" docs/site/initial-user-experience.html
-grep -q "sealion status" docs/site/initial-user-experience.html
+grep -q "carbide follow logs" docs/site/initial-user-experience.html
+grep -q "carbide status" docs/site/initial-user-experience.html
 grep -q "Install, create, run, register" docs/site/initial-user-experience.html
 grep -q "CI/CD regression plan" docs/site/ci-cd-regression-tests.html
 grep -q "Directory structure" docs/site/repo-structure.html

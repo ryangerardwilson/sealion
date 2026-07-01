@@ -1,4 +1,4 @@
-package main
+package carbide
 
 import (
 	"bytes"
@@ -60,14 +60,14 @@ func TestValidatePort(t *testing.T) {
 func TestRendererPlainOutput(t *testing.T) {
 	var out bytes.Buffer
 	newRenderer(&out).Message(
-		"Sealion",
+		"Carbide",
 		"project created",
 		outputRow{"path", "/tmp/demo"},
 		outputRow{"next", "cd demo"},
-		outputRow{"", "sealion run dev"},
+		outputRow{"", "carbide run dev"},
 	)
 
-	want := "Sealion\nproject created\n\npath  /tmp/demo\nnext  cd demo\n      sealion run dev\n"
+	want := "Carbide\nproject created\n\npath  /tmp/demo\nnext  cd demo\n      carbide run dev\n"
 	if out.String() != want {
 		t.Fatalf("renderer output = %q, want %q", out.String(), want)
 	}

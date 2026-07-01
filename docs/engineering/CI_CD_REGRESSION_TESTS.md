@@ -1,6 +1,6 @@
 # CI/CD Regression Test Plan
 
-Sealion's test strategy starts with repository contracts and grows toward full
+Carbide's test strategy starts with repository contracts and grows toward full
 Go backend, Postgres, container, and infrastructure regression coverage.
 
 ## Required Gates
@@ -140,29 +140,29 @@ Purpose: protect developer experience and generated files.
 
 Future checks:
 
-- `sealion new` creates the canonical directory structure;
-- `sealion init` succeeds only in an empty directory;
-- `sealion run dev` prints a compact startup summary and suppresses noisy
+- `carbide new` creates the canonical directory structure;
+- `carbide init` succeeds only in an empty directory;
+- `carbide run dev` prints a compact startup summary and suppresses noisy
   Compose build output by default;
-- `sealion run dev` prints only the working app/API URLs before the log stream,
+- `carbide run dev` prints only the working app/API URLs before the log stream,
   with no port-busy, demo-login, mode, status, stop, or watch-summary rows;
-- `sealion run dev` shows full-width TTY-only per-container startup animation while
+- `carbide run dev` shows full-width TTY-only per-container startup animation while
   Compose starts containers, without leaking progress control text into
   captured output, and without treating `NO_COLOR` as a request to disable
   terminal animation;
-- `Ctrl+C` during `sealion run dev` detaches from live logs without running
+- `Ctrl+C` during `carbide run dev` detaches from live logs without running
   `docker compose down`;
-- `sealion stop dev` is the explicit teardown path, runs `docker compose down`,
+- `carbide stop dev` is the explicit teardown path, runs `docker compose down`,
   and shows full-width TTY-only per-container shutdown animation;
 - CLI success, error, version, upgrade, and dev-stack output use the shared
   aligned renderer instead of scattered raw prints;
-- `sealion run dev` streams frontend, backend, database, and watch output
+- `carbide run dev` streams frontend, backend, database, and watch output
   through timestamped service-tagged rows after the stack is ready;
-- `sealion status` prints a stable table of services, container names,
+- `carbide status` prints a stable table of services, container names,
   published host ports, internal container ports, and status;
-- `sealion follow logs` reattaches to live container logs and preserves
+- `carbide follow logs` reattaches to live container logs and preserves
   timestamped, service-tagged rendering;
-- `sealion run dev` writes `.sealion/log/dev.jsonl`, and `sealion logs` can
+- `carbide run dev` writes `.carbide/log/dev.jsonl`, and `carbide logs` can
   query it by service, text, limit, and JSON output;
 - generated apps contain no seeded demo account or demo credentials;
 - generated files are deterministic;
@@ -204,7 +204,7 @@ Future checks:
 The first implemented CI job is intentionally small:
 
 ```sh
-bash -n scripts/*.sh bin/sealion install.sh
+bash -n scripts/*.sh bin/carbide bin/sealion install.sh
 go test ./...
 bash scripts/check_repo_contract.sh
 bash scripts/test_cli_scaffold.sh
