@@ -111,6 +111,11 @@ func TestHelpPrintsRuntimeReference(t *testing.T) {
 	if !strings.HasPrefix(got, "area") {
 		t.Fatalf("help output = %q, should start with table header", got)
 	}
+	for _, line := range strings.Split(strings.TrimRight(got, "\n"), "\n") {
+		if width := len(stripANSI(line)); width > 79 {
+			t.Fatalf("help line is %d columns, want <= 79: %q", width, line)
+		}
+	}
 	for _, want := range []string{
 		"area",
 		"command",

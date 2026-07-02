@@ -28,6 +28,7 @@ grep -q "help" "$tmp_dir/no-args.out"
 ! grep -q "raw.githubusercontent.com/ryangerardwilson/carbide" "$tmp_dir/no-args.out"
 
 "$repo_root/bin/carbide" help > "$tmp_dir/help.out"
+awk 'length($0) > 79 { print "help line exceeds 79 chars: " $0; exit 1 }' "$tmp_dir/help.out"
 grep -q "^area  .*command  .*purpose" "$tmp_dir/help.out"
 grep -q "start" "$tmp_dir/help.out"
 grep -q "develop" "$tmp_dir/help.out"
