@@ -51,52 +51,6 @@ Commands:
   help                 Show detailed help
 `
 
-const helpText = `Carbide
-Containerized full-stack apps with React, Go, and Postgres.
-
-global actions:
-  carbide help
-    show this help
-  carbide version
-    print the installed version
-  carbide upgrade
-    upgrade the installed CLI from GitHub when a newer commit is available
-
-features:
-  install the CLI from GitHub
-  # curl -fsSL <github-install-url> | bash
-  curl -fsSL https://raw.githubusercontent.com/ryangerardwilson/carbide/main/install.sh | bash
-
-  create a new project directory
-  # carbide new <project-name>
-  carbide new demo
-
-  initialize the current empty directory
-  # carbide init
-  mkdir demo && cd demo && carbide init
-
-  run the local development stack
-  # carbide run dev
-  cd demo && carbide run dev
-
-  inspect local development containers
-  # carbide status
-  cd demo && carbide status
-
-  stop the local development stack
-  # carbide stop dev
-  cd demo && carbide stop dev
-
-  follow live dev logs
-  # carbide follow logs [service <name>] [containing <text>]
-  carbide follow logs
-
-  inspect structured dev logs
-  # carbide logs [service <name>] [containing <text>] [limit <count>] [json]
-  carbide logs service backend
-  carbide logs containing "/api/login" json
-`
-
 type app struct {
 	home   string
 	stdout io.Writer
@@ -280,11 +234,37 @@ func (a app) printCommandList() {
 }
 
 func (a app) printHelp() {
-	if shouldStyleOutput(a.stdout) {
-		fmt.Fprintf(a.stdout, "\033[38;5;245m%s\033[0m", helpText)
-		return
-	}
-	fmt.Fprint(a.stdout, helpText)
+	r := newRenderer(a.stdout)
+	r.Title("Carbide", "Containerized full-stack apps with React, Go, and Postgres.")
+	r.HelpSection(
+		"Start",
+		outputRow{"carbide new <project-name>", "create a new project directory"},
+		outputRow{"carbide init", "initialize the current empty directory"},
+	)
+	r.HelpSection(
+		"Develop",
+		outputRow{"carbide run dev", "start the Docker dev stack"},
+		outputRow{"carbide status", "inspect containers, ports, and health"},
+		outputRow{"carbide stop dev", "stop local dev containers"},
+	)
+	r.HelpSection(
+		"Logs",
+		outputRow{"carbide follow logs", "stream live logs; add service <name> or containing <text>"},
+		outputRow{"carbide logs", "query saved logs; add service <name>, containing <text>, limit <count>, json"},
+	)
+	r.HelpSection(
+		"Maintain",
+		outputRow{"carbide help", "show this reference"},
+		outputRow{"carbide version", "print the installed version"},
+		outputRow{"carbide upgrade", "upgrade the installed CLI from GitHub"},
+	)
+	r.HelpSection(
+		"Examples",
+		outputRow{"carbide new demo", "create ./demo"},
+		outputRow{"carbide run dev", "start app, API, and Postgres containers"},
+		outputRow{"carbide follow logs service backend", "stream backend logs"},
+		outputRow{"carbide logs containing \"/api/login\" json", "query saved logs as JSON"},
+	)
 }
 
 func (a app) commandVersion() error {
@@ -792,6 +772,16 @@ func (r renderer) Section(title string, subtitle string) {
 			fmt.Fprintln(r.out, subtitle)
 		}
 	}
+	fmt.Fprintln(r.out)
+}
+
+func (r renderer) HelpSection(title string, rows ...outputRow) {
+	if r.styled {
+		fmt.Fprintf(r.out, "%s\n", r.paint("1;38;5;245", title))
+	} else {
+		fmt.Fprintln(r.out, title)
+	}
+	r.Rows(rows...)
 	fmt.Fprintln(r.out)
 }
 

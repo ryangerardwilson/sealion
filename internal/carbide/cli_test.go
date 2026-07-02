@@ -99,6 +99,53 @@ func TestBareCommandPrintsCommandList(t *testing.T) {
 	}
 }
 
+func TestHelpPrintsRuntimeReference(t *testing.T) {
+	var out bytes.Buffer
+	a := app{stdout: &out}
+
+	if err := a.run([]string{"help"}); err != nil {
+		t.Fatalf("run returned %v", err)
+	}
+
+	got := out.String()
+	for _, want := range []string{
+		"Carbide",
+		"Containerized full-stack apps with React, Go, and Postgres.",
+		"Start",
+		"carbide new <project-name>",
+		"carbide init",
+		"Develop",
+		"carbide run dev",
+		"carbide status",
+		"carbide stop dev",
+		"Logs",
+		"carbide follow logs",
+		"carbide logs",
+		"Maintain",
+		"carbide help",
+		"carbide version",
+		"carbide upgrade",
+		"Examples",
+		"carbide logs containing \"/api/login\" json",
+	} {
+		if !strings.Contains(got, want) {
+			t.Fatalf("help output = %q, missing %q", got, want)
+		}
+	}
+	for _, unwanted := range []string{
+		"install the CLI",
+		"<github-install-url>",
+		"curl -fsSL",
+		"raw.githubusercontent.com/ryangerardwilson/carbide",
+		"features:",
+		"global actions:",
+	} {
+		if strings.Contains(got, unwanted) {
+			t.Fatalf("help output = %q, should not contain %q", got, unwanted)
+		}
+	}
+}
+
 func TestRendererStyledLogoUsesGlyphColors(t *testing.T) {
 	r := renderer{styled: true}
 
