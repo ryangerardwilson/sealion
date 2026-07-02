@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"os"
 	"path/filepath"
-	"sort"
 	"strings"
 	"sync"
 	"testing"
@@ -109,35 +108,45 @@ func TestHelpPrintsRuntimeReference(t *testing.T) {
 	}
 
 	got := out.String()
-	if !strings.HasPrefix(got, "command") {
-		t.Fatalf("help output = %q, should start with table header", got)
+	if !strings.HasPrefix(got, "Usage:\n") {
+		t.Fatalf("help output = %q, should start with Usage section", got)
 	}
 	for _, line := range strings.Split(strings.TrimRight(got, "\n"), "\n") {
 		if width := len(stripANSI(line)); width > 79 {
 			t.Fatalf("help line is %d columns, want <= 79: %q", width, line)
 		}
 	}
-	commands := helpCommands(got)
-	sortedCommands := append([]string(nil), commands...)
-	sort.Strings(sortedCommands)
-	if strings.Join(commands, "\n") != strings.Join(sortedCommands, "\n") {
-		t.Fatalf("help commands are not sorted:\ngot  %#v\nwant %#v", commands, sortedCommands)
-	}
+	assertOutputOrder(t, got, []string{
+		"Usage:",
+		"  carbide <command> [arguments]",
+		"Available commands:",
+		"  help",
+		"  init",
+		"  logs",
+		"  new <project-name>",
+		"  status",
+		"  upgrade",
+		"  version",
+		"follow\n",
+		"  follow logs",
+		"  follow logs service backend",
+		"logs\n",
+		"  logs containing \"/api/login\" json",
+		"run\n",
+		"  run dev",
+		"stop\n",
+		"  stop dev",
+	})
 	for _, want := range []string{
-		"command",
-		"purpose",
-		"carbide new <project-name>",
-		"carbide init",
-		"carbide run dev",
-		"carbide status",
-		"carbide stop dev",
-		"carbide follow logs",
-		"carbide follow logs service backend",
-		"carbide logs",
-		"carbide help",
-		"carbide version",
-		"carbide upgrade",
-		"carbide logs containing \"/api/login\" json",
+		"Usage:",
+		"Available commands:",
+		"new <project-name>",
+		"run dev",
+		"stop dev",
+		"follow logs",
+		"logs containing \"/api/login\" json",
+		"upgrade",
+		"version",
 	} {
 		if !strings.Contains(got, want) {
 			t.Fatalf("help output = %q, missing %q", got, want)
@@ -145,6 +154,10 @@ func TestHelpPrintsRuntimeReference(t *testing.T) {
 	}
 	for _, unwanted := range []string{
 		"area",
+		"command  ",
+		"purpose",
+		"carbide help",
+		"carbide run dev",
 		"Carbide\n",
 		"Containerized full-stack apps with React, Go, and Postgres.",
 		"_____________________________________________________",
@@ -162,16 +175,16 @@ func TestHelpPrintsRuntimeReference(t *testing.T) {
 	}
 }
 
-func helpCommands(output string) []string {
-	var commands []string
-	for index, line := range strings.Split(strings.TrimRight(output, "\n"), "\n") {
-		if index == 0 || strings.TrimSpace(line) == "" {
-			continue
+func assertOutputOrder(t *testing.T, output string, values []string) {
+	t.Helper()
+	offset := 0
+	for _, value := range values {
+		index := strings.Index(output[offset:], value)
+		if index < 0 {
+			t.Fatalf("output missing %q after byte %d:\n%s", value, offset, output)
 		}
-		columns := strings.SplitN(line, "  ", 2)
-		commands = append(commands, strings.TrimSpace(columns[0]))
+		offset += index + len(value)
 	}
-	return commands
 }
 
 func TestRendererStyledLogoUsesGlyphColors(t *testing.T) {

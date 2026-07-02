@@ -78,6 +78,11 @@ type outputRow struct {
 
 type tableRow []string
 
+type helpCommandSection struct {
+	name string
+	rows []outputRow
+}
+
 type runningProcess struct {
 	name string
 	cmd  *exec.Cmd
@@ -235,23 +240,44 @@ func (a app) printCommandList() {
 
 func (a app) printHelp() {
 	r := newRenderer(a.stdout)
-	r.Table(
-		[]string{"command", "purpose"},
-		[]tableRow{
-			{"carbide follow logs", "stream live logs"},
-			{"carbide follow logs service backend", "stream one service"},
-			{"carbide help", "show this table"},
-			{"carbide init", "init current directory"},
-			{"carbide logs", "query saved logs"},
-			{"carbide logs containing \"/api/login\" json", "query logs as JSON"},
-			{"carbide new <project-name>", "create project directory"},
-			{"carbide run dev", "start Docker dev stack"},
-			{"carbide status", "show containers and ports"},
-			{"carbide stop dev", "stop dev containers"},
-			{"carbide upgrade", "upgrade CLI from GitHub"},
-			{"carbide version", "print installed version"},
+	r.CommandList([]helpCommandSection{
+		{
+			rows: []outputRow{
+				{"help", "show this help"},
+				{"init", "init current directory"},
+				{"logs", "query saved logs"},
+				{"new <project-name>", "create project directory"},
+				{"status", "show containers and ports"},
+				{"upgrade", "upgrade CLI from GitHub"},
+				{"version", "print installed version"},
+			},
 		},
-	)
+		{
+			name: "follow",
+			rows: []outputRow{
+				{"follow logs", "stream live logs"},
+				{"follow logs service backend", "stream one service"},
+			},
+		},
+		{
+			name: "logs",
+			rows: []outputRow{
+				{"logs containing \"/api/login\" json", "query logs as JSON"},
+			},
+		},
+		{
+			name: "run",
+			rows: []outputRow{
+				{"run dev", "start Docker dev stack"},
+			},
+		},
+		{
+			name: "stop",
+			rows: []outputRow{
+				{"stop dev", "stop dev containers"},
+			},
+		},
+	})
 }
 
 func (a app) commandVersion() error {
@@ -813,6 +839,40 @@ func (r renderer) Table(headers []string, rows []tableRow) {
 	}
 }
 
+func (r renderer) CommandList(sections []helpCommandSection) {
+	fmt.Fprintln(r.out, r.formatHelpHeading("Usage:"))
+	fmt.Fprintln(r.out, "  carbide <command> [arguments]")
+	fmt.Fprintln(r.out)
+	fmt.Fprintln(r.out, r.formatHelpHeading("Available commands:"))
+
+	width := helpCommandWidth(sections)
+	for _, section := range sections {
+		if section.name != "" {
+			fmt.Fprintln(r.out, r.formatHelpGroup(section.name))
+		}
+		for _, row := range section.rows {
+			r.writeHelpCommand(row, width)
+		}
+	}
+}
+
+func (r renderer) writeHelpCommand(row outputRow, width int) {
+	if r.styled {
+		key := r.paint("38;5;245", row.key)
+		fmt.Fprintf(r.out, "  %s%s  %s\n", key, strings.Repeat(" ", width-len(row.key)), row.value)
+		return
+	}
+	fmt.Fprintf(r.out, "  %-*s  %s\n", width, row.key, row.value)
+}
+
+func (r renderer) formatHelpHeading(value string) string {
+	return r.paint("1;38;5;245", value)
+}
+
+func (r renderer) formatHelpGroup(value string) string {
+	return r.paint("1;38;5;245", value)
+}
+
 func (r renderer) Row(row outputRow) {
 	r.writeRow(row, len(row.key))
 }
@@ -1161,6 +1221,18 @@ func rowTextWidth(values []string) int {
 	for _, value := range values {
 		if len(value) > width {
 			width = len(value)
+		}
+	}
+	return width
+}
+
+func helpCommandWidth(sections []helpCommandSection) int {
+	width := 0
+	for _, section := range sections {
+		for _, row := range section.rows {
+			if len(row.key) > width {
+				width = len(row.key)
+			}
 		}
 	}
 	return width
